@@ -4,12 +4,11 @@ import { isLocalCommand, executeLocalCommand } from './commands.js';
 
 // --- DOM ELEMENTS AND STATE ---
 const commandInputEl = document.getElementById('command-input');
-const outputEl = document.getElementById('output');
 
 const state = {
     user: 'hybrid',
     host: 'web-terminal',
-    cwd: '~', // We'll let the backend manage the CWD, this is just for display
+    cwd: '~',
     history: [],
     historyIndex: -1,
     startTime: new Date()
@@ -32,23 +31,23 @@ function connectToBackend() {
 
     ws.onmessage = (event) => {
         backendBuffer += event.data;
-
-        // --- THIS IS THE CORRECTED LOGIC ---
-        // The default bash prompt for our non-root user ends with '$ '.
-        // This is our signal that a command has finished executing.
         const prompt_signal = '$ ';
 
         if (backendBuffer.endsWith(prompt_signal)) {
-            // Remove the prompt signal itself from the output buffer
             let cleanOutput = backendBuffer.substring(0, backendBuffer.lastIndexOf(prompt_signal));
 
-            // The pty often echoes the command we just sent. We can clean that up.
-            const lastCommand = state.history[0];
-            if (lastCommand && cleanOutput.startsWith(lastCommand)) {
-                cleanOutput = cleanOutput.substring(lastCommand.length).trimStart();
+            // --- THIS IS THE CORRECTED, ROBUST LOGIC ---
+            // Only try to clean up the command echo if a command has actually been sent.
+            // On initial connection, history is empty and we don't need to clean anything.
+            if (state.history.length > 0) {
+                const lastCommand = state.history[0];
+                // Check if the pty echoed the command back to us
+                if (lastCommand && cleanOutput.trim().startsWith(lastCommand)) {
+                    // If so, remove the echoed command from the output string
+                    cleanOutput = cleanOutput.trim().substring(lastCommand.length).trimStart();
+                }
             }
             
-            // Print the final, cleaned output if there is any
             if (cleanOutput) {
                 term.print(cleanOutput);
             }
@@ -70,25 +69,22 @@ function connectToBackend() {
     };
 }
 
-
 // --- COMMAND PROCESSING ---
 function processInput(input) {
-    if (!input) return; // Don't process empty input
+    if (!input) return;
 
-    term.hidePrompt(); // Hide the current input line
+    term.hidePrompt();
     
-    const promptHtml = `<span class="prompt-text"><span class="math-inline">\{state\.user\}@</span>{state.host}:<span class="math-inline">\{state\.cwd\}</span></span>`;
-    term.print({ html: `<span class="math-inline">\{promptHtml\} <span class\="output\-command"\></span>{input}</span>` });
+    const promptHtml = `<span class="prompt-text">${state.user}@${state.host}:${state.cwd}$</span>`;
+    term.print({ html: `${promptHtml} <span class="output-command">${input}</span>` });
     
     state.history.unshift(input);
     state.historyIndex = -1;
 
-    // HYBRID logic
     if (isLocalCommand(input.split(' ')[0])) {
         executeLocalCommand(input, term, state);
         term.showPrompt(state);
     } else {
-        // Remote command for the Docker backend
         if (ws && ws.readyState === WebSocket.OPEN) {
             ws.send(input + '\n');
             term.lock();
@@ -108,4 +104,26 @@ async function init() {
 }
 
 // --- EVENT LISTENERS ---
-commandInput
+commandInputEl.addEventListener('keydown', (e) => {
+    if (term.locked()) return;
+
+    if (e.key === 'Enter') {
+        const input = commandInputEl.value.trim();
+        commandInputEl.value = '';
+        processInput(input);
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (state.historyIndex < state.history.length - 1) {
+            state.historyIndex++;
+            commandInputEl.value = state.history[state.historyIndex];
+        }
+    } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (state.historyIndex > -1) {
+            state.historyIndex--;
+            commandInputEl.value = state.historyIndex === -1 ? '' : state.history[state.historyIndex];
+        }
+    }
+});
+
+init();
