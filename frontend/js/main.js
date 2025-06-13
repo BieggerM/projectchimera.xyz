@@ -1,7 +1,5 @@
 // js/main.js
 
-// Beachten Sie, dass Terminal und FitAddon globale Variablen sind,
-// die von den Skripten in index.html bereitgestellt werden.
 const term = new Terminal({
     fontFamily: "'Fira Mono', monospace",
     fontSize: 16,
@@ -33,31 +31,45 @@ const term = new Terminal({
 const fitAddon = new FitAddon.FitAddon();
 term.loadAddon(fitAddon);
 
-// Hängen Sie das Terminal an unseren Container
 const termContainer = document.getElementById('terminal-container');
 term.open(termContainer);
 
-// Passen Sie die Grösse des Terminals an den Container an
 fitAddon.fit();
-
-// Passen Sie die Grösse bei Fensteränderungen an
 window.addEventListener('resize', () => fitAddon.fit());
 
 term.write('Welcome to your fully interactive and secure web terminal!\r\n');
 term.write('Connecting to backend...\r\n');
 
 
-// --- WebSocket-Verbindung (jetzt radikal einfach) ---
+// --- WebSocket Connection ---
 const websocketUrl = `ws://192.168.0.99:3000/terminal`;
 const ws = new WebSocket(websocketUrl);
 
-// Wenn die Verbindung aufgeht, fokussieren Sie das Terminal
+
+/**
+ * Helper function to send a resize message to the backend.
+ * @param {number} cols The number of columns.
+ * @param {number} rows The number of rows.
+ */
+function sendResizeToBackend(cols, rows) {
+    if (ws.readyState === WebSocket.OPEN) {
+        const message = JSON.stringify({
+            type: 'resize',
+            cols: cols,
+            rows: rows
+        });
+        ws.send(message);
+    }
+}
+
+
 ws.onopen = () => {
     term.write('Connection [ESTABLISHED].\r\n\r\n');
     term.focus();
+    // Send the initial size to the backend right away.
+    sendResizeToBackend(term.cols, term.rows);
 };
 
-// Leite einfach alle Daten vom Backend direkt an xterm.js weiter
 ws.onmessage = (event) => {
     term.write(event.data);
 };
@@ -70,9 +82,16 @@ ws.onerror = (error) => {
     term.write(`\r\n\r\n<Connection Error: Could not connect to backend at ${websocketUrl}>`);
 };
 
-// Leite einfach alle Benutzereingaben (Tastendrücke) direkt an das Backend weiter
+// --- THIS IS THE UPDATED INPUT HANDLING ---
+
+// Send user keystrokes to the backend.
 term.onData(data => {
     if (ws.readyState === WebSocket.OPEN) {
         ws.send(data);
     }
+});
+
+// When xterm.js is resized, send the new dimensions to the backend.
+term.onResize(({ cols, rows }) => {
+    sendResizeToBackend(cols, rows);
 });
