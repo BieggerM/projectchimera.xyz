@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+<head>
+    <title>Web Terminal</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.min.css" />
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-color: #000;
+        }
+        #terminal {
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="terminal"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js"></script>
+
+    <script>
+        const term = new Terminal({
+            cursorBlink: true,
+            theme: {
+                background: '#1e1e1e',
+                foreground: '#d4d4d4',
+            }
+        });
+
+        term.open(document.getElementById('terminal'));
+
+        const websocketUrl = `ws://192.168.0.99:3000/terminal`;
+        const ws = new WebSocket(websocketUrl);
+
+        ws.onopen = () => {
+            term.write('Willkommen im Web-Terminal!\r\n');
+            term.write('Ein sicherer, isolierter Container wurde für deine Sitzung erstellt.\r\n\r\n');
+        };
+
+        ws.onmessage = (event) => {
+            term.write(event.data);
+        };
+
+        ws.onerror = (event) => {
+            console.error('WebSocket-Fehler:', event);
+            term.write('\r\n\r\n--- VERBINDUNGSFEHLER ---\r\n');
+        };
+
+        ws.onclose = () => {
+            term.write('\r\n\r\n--- SITZUNG BEENDET ---\r\n');
+        };
+
+        term.onData(data => {
+            ws.send(data);
+        });
+
+    </script>
+</body>
+</html>
