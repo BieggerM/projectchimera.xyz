@@ -1,135 +1,78 @@
 // js/main.js
-import term from './terminal.js';
-import { isLocalCommand, executeLocalCommand } from './commands.js';
-import AnsiToHtml from 'https://esm.sh/ansi-to-html';
 
-
-// --- DOM ELEMENTS AND STATE ---
-const commandInputEl = document.getElementById('command-input');
-
-const state = {
-    user: 'hybrid',
-    host: 'web-terminal',
-    cwd: '~',
-    history: [],
-    historyIndex: -1,
-    startTime: new Date()
-};
-
-// --- WEBSOCKET CONNECTION AND ANSI CONVERTER ---
-const websocketUrl = `ws://192.168.0.99:3000/terminal`;
-const ansiToHtml = new AnsiToHtml({ fg: 'var(--foreground)', bg: 'var(--background)' });
-let ws;
-let backendBuffer = '';
-
-function stripAnsi(str) {
-    return str.replace(/\x1B\[[0-?]*[ -/]*[@-~]/g, '');
-}
-
-function connectToBackend() {
-    ws = new WebSocket(websocketUrl);
-
-    ws.onopen = () => {
-        console.log('Connected to backend shell.');
-        term.print({ html: 'Backend shell connection <span class="output-item">[ESTABLISHED]</span>. Welcome.' });
-    };
-
-    ws.onmessage = (event) => {
-        backendBuffer += event.data;
-        const cleanBuffer = stripAnsi(backendBuffer);
-        
-        if (cleanBuffer.trim().endsWith('$') || cleanBuffer.trim().endsWith('#')) {
-            const lines = backendBuffer.split('\n');
-            const outputLines = lines.slice(0, -1);
-            
-            let finalLines = outputLines;
-            if (state.history.length > 0) {
-                const lastCommand = state.history[0];
-                if (finalLines.length > 0 && stripAnsi(finalLines[0]).trim().endsWith(lastCommand)) {
-                    finalLines = finalLines.slice(1);
-                }
-            }
-            
-            let rawOutput = finalLines.join('\n');
-            
-            if (rawOutput) {
-                // --- FIX 1: Manually remove the "?2004l" artifact ---
-                rawOutput = rawOutput.replace(/\?2004l/g, '');
-
-                const htmlOutput = ansiToHtml.toHtml(rawOutput);
-
-                // --- FIX 2: Wrap the output in <pre> tags to preserve formatting ---
-                term.print({ html: `<pre>${htmlOutput}</pre>` });
-            }
-
-            backendBuffer = '';
-            term.unlock();
-            term.showPrompt(state);
-        }
-    };
-
-    ws.onclose = () => {
-        term.print({ html: '<span class="output-error">Backend shell connection [TERMINATED]. Please refresh the page to reconnect.</span>'});
-        term.lock();
-    };
-
-    ws.onerror = (error) => {
-        term.print({ html: `<span class="output-error">Connection Error: Could not connect to the backend at ${websocketUrl}. Ensure the server is running.</span>`});
-        term.lock();
-    };
-}
-
-function processInput(input) {
-    if (!input) return;
-
-    term.hidePrompt();
-    const promptHtml = `<span class="prompt-text">${state.user}@${state.host}:${state.cwd}$</span>`;
-    term.print({ html: `${promptHtml} <span class="output-command">${input}</span>` });
-    
-    state.history.unshift(input);
-    state.historyIndex = -1;
-
-    if (isLocalCommand(input.split(' ')[0])) {
-        executeLocalCommand(input, term, state);
-        term.showPrompt(state);
-    } else {
-        if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send(input + '\n');
-            term.lock();
-        } else {
-            term.print({ html: '<span class="output-error">Error: Not connected to backend shell.</span>' });
-            term.showPrompt(state);
-        }
-    }
-}
-
-async function init() {
-    term.initViewportHandler();
-    term.lock();
-    term.print("Initializing Hybrid Terminal...");
-    connectToBackend();
-}
-
-commandInputEl.addEventListener('keydown', (e) => {
-    if (term.locked()) return;
-
-    if (e.key === 'Enter') {
-        const input = commandInputEl.value.trim();
-        commandInputEl.value = '';
-        processInput(input);
-    } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        if (state.historyIndex < state.history.length - 1) {
-            state.historyIndex++;
-            commandInputEl.value = state.history[state.historyIndex];
-        }
-    } else if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        if (state.historyIndex > -1) {
-            state.historyIndex--;
-            commandInputEl.value = state.historyIndex === -1 ? '' : state.history[state.historyIndex];
-        }
+// Beachten Sie, dass Terminal und FitAddon globale Variablen sind,
+// die von den Skripten in index.html bereitgestellt werden.
+const term = new Terminal({
+    fontFamily: "'Fira Mono', monospace",
+    fontSize: 16,
+    cursorBlink: true,
+    theme: {
+        background: '#1a1b26',
+        foreground: '#c0caf5',
+        cursor: '#c0caf5',
+        selectionBackground: '#414868',
+        black: '#15161e',
+        red: '#f7768e',
+        green: '#9ece6a',
+        yellow: '#e0af68',
+        blue: '#7aa2f7',
+        magenta: '#bb9af7',
+        cyan: '#7dcfff',
+        white: '#a9b1d6',
+        brightBlack: '#414868',
+        brightRed: '#f7768e',
+        brightGreen: '#9ece6a',
+        brightYellow: '#e0af68',
+        brightBlue: '#7aa2f7',
+        brightMagenta: '#bb9af7',
+        brightCyan: '#7dcfff',
+        brightWhite: '#c0caf5',
     }
 });
 
-init();
+const fitAddon = new FitAddon.FitAddon();
+term.loadAddon(fitAddon);
+
+// Hängen Sie das Terminal an unseren Container
+const termContainer = document.getElementById('terminal-container');
+term.open(termContainer);
+
+// Passen Sie die Grösse des Terminals an den Container an
+fitAddon.fit();
+
+// Passen Sie die Grösse bei Fensteränderungen an
+window.addEventListener('resize', () => fitAddon.fit());
+
+term.write('Welcome to your fully interactive and secure web terminal!\r\n');
+term.write('Connecting to backend...\r\n');
+
+
+// --- WebSocket-Verbindung (jetzt radikal einfach) ---
+const websocketUrl = `ws://192.168.0.99:3000/terminal`;
+const ws = new WebSocket(websocketUrl);
+
+// Wenn die Verbindung aufgeht, fokussieren Sie das Terminal
+ws.onopen = () => {
+    term.write('Connection [ESTABLISHED].\r\n\r\n');
+    term.focus();
+};
+
+// Leite einfach alle Daten vom Backend direkt an xterm.js weiter
+ws.onmessage = (event) => {
+    term.write(event.data);
+};
+
+ws.onclose = () => {
+    term.write('\r\n\r\nConnection [TERMINATED].');
+};
+
+ws.onerror = (error) => {
+    term.write(`\r\n\r\n<Connection Error: Could not connect to backend at ${websocketUrl}>`);
+};
+
+// Leite einfach alle Benutzereingaben (Tastendrücke) direkt an das Backend weiter
+term.onData(data => {
+    if (ws.readyState === WebSocket.OPEN) {
+        ws.send(data);
+    }
+});
