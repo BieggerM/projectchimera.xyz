@@ -1,7 +1,7 @@
 // js/main.js
 import term from './terminal.js';
 import { isLocalCommand, executeLocalCommand } from './commands.js';
-
+import AnsiToHtml from 'https://esm.sh/ansi-to-html';
 // --- DOM ELEMENTS AND STATE ---
 const commandInputEl = document.getElementById('command-input');
 
@@ -14,10 +14,23 @@ const state = {
     startTime: new Date()
 };
 
-// --- WEBSOCKET CONNECTION TO REAL SHELL ---
+// --- WEBSOCKET CONNECTION ---
 const websocketUrl = `ws://192.168.0.99:3000/terminal`;
 let ws;
 let backendBuffer = '';
+
+/**
+ * A helper function to remove all ANSI escape codes from a string.
+ * We use this to reliably check the content of the buffer without
+ * being confused by color codes or other control characters.
+ * @param {string} str The string to clean.
+ * @returns {string} The cleaned string.
+ */
+function stripAnsi(str) {
+    // This regex matches all ANSI escape codes.
+    return str.replace(/\x1B\[[0-?]*[ -/]*[@-~]/g, '');
+}
+
 
 function connectToBackend() {
     ws = new WebSocket(websocketUrl);
@@ -25,34 +38,42 @@ function connectToBackend() {
     ws.onopen = () => {
         console.log('Connected to backend shell.');
         term.print({ html: 'Backend shell connection <span class="output-item">[ESTABLISHED]</span>. Welcome.' });
-        term.unlock();
-        term.showPrompt(state);
+        // The prompt will be shown by the first onmessage event.
     };
 
     ws.onmessage = (event) => {
+        const ansiToHtml = new AnsiToHtml({ fg: 'var(--foreground)', bg: 'var(--background)' });
         backendBuffer += event.data;
-        const prompt_signal = '$ ';
-
-        if (backendBuffer.endsWith(prompt_signal)) {
-            let cleanOutput = backendBuffer.substring(0, backendBuffer.lastIndexOf(prompt_signal));
-
-            // --- THIS IS THE CORRECTED, ROBUST LOGIC ---
-            // Only try to clean up the command echo if a command has actually been sent.
-            // On initial connection, history is empty and we don't need to clean anything.
+        
+        // Clean the buffer of invisible characters for logical checks
+        const cleanBuffer = stripAnsi(backendBuffer);
+        
+        // Check if the cleaned buffer ends with our known prompt pattern
+        if (cleanBuffer.endsWith(':~$ ') || cleanBuffer.endsWith(':/# ')) {
+            // Split the original buffer (with colors) into lines
+            const lines = backendBuffer.split('\n');
+            
+            // The last line is the prompt, which we don't want to display
+            const outputLines = lines.slice(0, -1);
+            
+            // The first line might be the echoed command, let's remove it
+            let finalLines = outputLines;
             if (state.history.length > 0) {
                 const lastCommand = state.history[0];
-                // Check if the pty echoed the command back to us
-                if (lastCommand && cleanOutput.trim().startsWith(lastCommand)) {
-                    // If so, remove the echoed command from the output string
-                    cleanOutput = cleanOutput.trim().substring(lastCommand.length).trimStart();
+                if (finalLines.length > 0 && stripAnsi(finalLines[0]).trim().endsWith(lastCommand)) {
+                    finalLines = finalLines.slice(1);
                 }
             }
             
-            if (cleanOutput) {
-                term.print(cleanOutput);
+            // Join the remaining lines and convert to HTML
+            const rawOutput = finalLines.join('\n');
+            if (rawOutput) {
+                const htmlOutput = ansiToHtml.toHtml(rawOutput);
+                term.print({ html: htmlOutput });
             }
 
-            backendBuffer = ''; // Clear the buffer for the next command
+            // Reset for the next command
+            backendBuffer = '';
             term.unlock();
             term.showPrompt(state);
         }
@@ -69,12 +90,12 @@ function connectToBackend() {
     };
 }
 
+
 // --- COMMAND PROCESSING ---
 function processInput(input) {
     if (!input) return;
 
     term.hidePrompt();
-    
     const promptHtml = `<span class="prompt-text">${state.user}@${state.host}:${state.cwd}$</span>`;
     term.print({ html: `${promptHtml} <span class="output-command">${input}</span>` });
     

@@ -75,6 +75,18 @@
     .output-dir { color: var(--dir); font-weight: bold; }
     .output-link { color: var(--item); text-decoration: underline; cursor: pointer; }
     .output-neofetch-art { color: var(--prompt); }
+
+    /* Styles for the ANSI color codes */
+    .ansi-bold { font-weight: bold; }
+    .ansi-fg-black { color: #2e3440; }
+    .ansi-fg-red { color: #bf616a; }
+    .ansi-fg-green { color: #a3be8c; }
+    .ansi-fg-yellow { color: #ebcb8b; }
+    .ansi-fg-blue { color: #81a1c1; }
+    .ansi-fg-magenta { color: #b48ead; }
+    .ansi-fg-cyan { color: #88c0d0; }
+    .ansi-fg-white { color: #e5e9f0; }
+
     </style>
 </head>
 <body>
@@ -86,7 +98,7 @@
             <span id="prompt" class="prompt-text"></span>
             <input type="text" id="command-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
         </div>
-    </div>
+    </div>    
     <script type="module" src="js/main.js"></script>
 </body>
 </html>
