@@ -2,6 +2,8 @@
 import term from './terminal.js';
 import { isLocalCommand, executeLocalCommand } from './commands.js';
 import AnsiToHtml from 'https://esm.sh/ansi-to-html';
+
+
 // --- DOM ELEMENTS AND STATE ---
 const commandInputEl = document.getElementById('command-input');
 
@@ -14,23 +16,15 @@ const state = {
     startTime: new Date()
 };
 
-// --- WEBSOCKET CONNECTION ---
+// --- WEBSOCKET CONNECTION AND ANSI CONVERTER ---
 const websocketUrl = `ws://192.168.0.99:3000/terminal`;
+const ansiToHtml = new AnsiToHtml({ fg: 'var(--foreground)', bg: 'var(--background)' });
 let ws;
 let backendBuffer = '';
 
-/**
- * A helper function to remove all ANSI escape codes from a string.
- * We use this to reliably check the content of the buffer without
- * being confused by color codes or other control characters.
- * @param {string} str The string to clean.
- * @returns {string} The cleaned string.
- */
 function stripAnsi(str) {
-    // This regex matches all ANSI escape codes.
     return str.replace(/\x1B\[[0-?]*[ -/]*[@-~]/g, '');
 }
-
 
 function connectToBackend() {
     ws = new WebSocket(websocketUrl);
@@ -38,25 +32,16 @@ function connectToBackend() {
     ws.onopen = () => {
         console.log('Connected to backend shell.');
         term.print({ html: 'Backend shell connection <span class="output-item">[ESTABLISHED]</span>. Welcome.' });
-        // The prompt will be shown by the first onmessage event.
     };
 
     ws.onmessage = (event) => {
-        const ansiToHtml = new AnsiToHtml({ fg: 'var(--foreground)', bg: 'var(--background)' });
         backendBuffer += event.data;
-        
-        // Clean the buffer of invisible characters for logical checks
         const cleanBuffer = stripAnsi(backendBuffer);
         
-        // Check if the cleaned buffer ends with our known prompt pattern
-        if (cleanBuffer.endsWith(':~$ ') || cleanBuffer.endsWith(':/# ')) {
-            // Split the original buffer (with colors) into lines
+        if (cleanBuffer.trim().endsWith('$') || cleanBuffer.trim().endsWith('#')) {
             const lines = backendBuffer.split('\n');
-            
-            // The last line is the prompt, which we don't want to display
             const outputLines = lines.slice(0, -1);
             
-            // The first line might be the echoed command, let's remove it
             let finalLines = outputLines;
             if (state.history.length > 0) {
                 const lastCommand = state.history[0];
@@ -65,14 +50,18 @@ function connectToBackend() {
                 }
             }
             
-            // Join the remaining lines and convert to HTML
-            const rawOutput = finalLines.join('\n');
+            let rawOutput = finalLines.join('\n');
+            
             if (rawOutput) {
+                // --- FIX 1: Manually remove the "?2004l" artifact ---
+                rawOutput = rawOutput.replace(/\?2004l/g, '');
+
                 const htmlOutput = ansiToHtml.toHtml(rawOutput);
-                term.print({ html: htmlOutput });
+
+                // --- FIX 2: Wrap the output in <pre> tags to preserve formatting ---
+                term.print({ html: `<pre>${htmlOutput}</pre>` });
             }
 
-            // Reset for the next command
             backendBuffer = '';
             term.unlock();
             term.showPrompt(state);
@@ -90,8 +79,6 @@ function connectToBackend() {
     };
 }
 
-
-// --- COMMAND PROCESSING ---
 function processInput(input) {
     if (!input) return;
 
@@ -116,7 +103,6 @@ function processInput(input) {
     }
 }
 
-// --- INITIALIZATION ---
 async function init() {
     term.initViewportHandler();
     term.lock();
@@ -124,7 +110,6 @@ async function init() {
     connectToBackend();
 }
 
-// --- EVENT LISTENERS ---
 commandInputEl.addEventListener('keydown', (e) => {
     if (term.locked()) return;
 
