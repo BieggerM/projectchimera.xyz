@@ -17,17 +17,14 @@ app.ws('/terminal', (ws, req) => {
     const ptyProcess = pty.spawn('docker', [
         'run', '--rm', '--interactive', '--tty',
         '--read-only',
-        '--tmpfs', '/home/terminal_user:rw,exec',
+        '--tmpfs', '/home/terminal_user:rw,exec,uid=1000,gid=1000',
         '--network=none',
         '--cpus=0.5',
         '--memory=128m',
         '--cap-drop=ALL',
-        
-        // --- NEW LINES START HERE ---
-        '--hostname', 'isopod', // 1. Set a static, custom hostname for the container.
-        '--env', 'PS1=[\\u@\\h \\W]\\$ ', // 2. Set the bash prompt format.
-        // --- NEW LINES END HERE ---
-
+        '--cap-add=SETUID',
+        '--hostname', 'isopod',
+        '--env', 'PS1=[\\u@\\h \\W]\\$ ',
         dockerImageName
     ], {
         name: 'xterm-color',
@@ -37,8 +34,18 @@ app.ws('/terminal', (ws, req) => {
         env: process.env
     });
 
+    // ... der Rest der Datei bleibt unverändert ...
+
+    const interceptionSignal = 'ACTION:FILE_INTERCEPTED\n';
+
     ptyProcess.onData(data => {
-        ws.send(data);
+        if (data.startsWith(interceptionSignal)) {
+            console.log('[SERVER] Interception detected! User accessed the special file.');
+            const userMessage = data.substring(interceptionSignal.length);
+            ws.send(userMessage);
+        } else {
+            ws.send(data);
+        }
     });
 
     ws.on('message', (message) => {
