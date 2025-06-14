@@ -1,0 +1,3 @@
+cat /etc/motd
+
+export PROMPT_COMMAND='[ "$(id -u)" -eq 0 ] && echo -e "\n\e[91mALERT: Root access detected. Terminating session.\e[0m" && kill 1'

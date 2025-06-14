@@ -41,16 +41,10 @@ term.write('Welcome to your fully interactive and secure web terminal!\r\n');
 term.write('Connecting to backend...\r\n');
 
 
-// --- WebSocket Connection ---
 const websocketUrl = `ws://192.168.0.99:3000/terminal`;
 const ws = new WebSocket(websocketUrl);
+let backendBuffer = ''; // A buffer to handle chunked data
 
-
-/**
- * Helper function to send a resize message to the backend.
- * @param {number} cols The number of columns.
- * @param {number} rows The number of rows.
- */
 function sendResizeToBackend(cols, rows) {
     if (ws.readyState === WebSocket.OPEN) {
         const message = JSON.stringify({
@@ -62,16 +56,47 @@ function sendResizeToBackend(cols, rows) {
     }
 }
 
-
 ws.onopen = () => {
     term.write('Connection [ESTABLISHED].\r\n\r\n');
     term.focus();
-    // Send the initial size to the backend right away.
     sendResizeToBackend(term.cols, term.rows);
 };
 
+// --- THIS IS THE NEW, ROBUST MESSAGE HANDLER ---
 ws.onmessage = (event) => {
-    term.write(event.data);
+    // Always append incoming data to our buffer
+    backendBuffer += event.data;
+
+    const actionPrefix = "ACTION:OPEN_URL:";
+    let actionIndex = backendBuffer.indexOf(actionPrefix);
+
+    // Check if the complete action string exists in our buffer
+    if (actionIndex !== -1) {
+        // Extract the part of the buffer after the action prefix
+        const urlPart = backendBuffer.substring(actionIndex + actionPrefix.length);
+        
+        // The URL is everything from there until the next newline character
+        const url = urlPart.split('\n')[0].trim();
+        
+        if (url) {
+            console.log(`ACTION: Opening URL: ${url}`);
+            window.open(url, '_blank');
+        }
+
+        // Clear the buffer so we don't process the action again
+        backendBuffer = '';
+
+        // We still need to ask the backend for a fresh prompt to keep the shell state clean
+        if (ws.readyState === WebSocket.OPEN) {
+            ws.send('\n');
+        }
+
+    } else {
+        // If no action string is found, write the whole buffer to the terminal
+        // and then clear it. xterm.js will handle rendering everything correctly.
+        term.write(backendBuffer);
+        backendBuffer = '';
+    }
 };
 
 ws.onclose = () => {
@@ -82,16 +107,12 @@ ws.onerror = (error) => {
     term.write(`\r\n\r\n<Connection Error: Could not connect to backend at ${websocketUrl}>`);
 };
 
-// --- THIS IS THE UPDATED INPUT HANDLING ---
-
-// Send user keystrokes to the backend.
 term.onData(data => {
     if (ws.readyState === WebSocket.OPEN) {
         ws.send(data);
     }
 });
 
-// When xterm.js is resized, send the new dimensions to the backend.
 term.onResize(({ cols, rows }) => {
     sendResizeToBackend(cols, rows);
 });
