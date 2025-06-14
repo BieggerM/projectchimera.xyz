@@ -1,5 +1,3 @@
-// js/main.js
-
 const term = new Terminal({
     fontFamily: "'Fira Mono', monospace",
     fontSize: 16,
@@ -43,7 +41,6 @@ term.write('Connecting to backend...\r\n');
 
 const websocketUrl = `ws://192.168.0.99:3000/terminal`;
 const ws = new WebSocket(websocketUrl);
-let backendBuffer = ''; // A buffer to handle chunked data
 
 function sendResizeToBackend(cols, rows) {
     if (ws.readyState === WebSocket.OPEN) {
@@ -62,42 +59,49 @@ ws.onopen = () => {
     sendResizeToBackend(term.cols, term.rows);
 };
 
-// --- THIS IS THE NEW, ROBUST MESSAGE HANDLER ---
+
+// --- NEUE FUNKTION FÜR DEN GLITCH-EFFEKT ---
+function triggerGlitchEffect(payload) {
+    const glitchChars = '▓▒░█';
+    let counter = 0;
+    const interval = setInterval(() => {
+        if (counter >= 15) { // Anzahl der Glitch-Zeilen
+            clearInterval(interval);
+            term.clear(); // Terminal leeren
+            // \x1b[31m setzt die Farbe auf Rot, \x1b[0m setzt sie zurück
+            term.write(`\r\n\x1b[31mSYSTEM INTEGRITY COMPROMISED.\x1b[0m\r\n`); 
+            term.write(`A new log file was created: ${payload.logfileName}\r\n\r\n`);
+            return;
+        }
+
+        let line = '';
+        for (let i = 0; i < term.cols; i++) {
+            line += glitchChars[Math.floor(Math.random() * glitchChars.length)];
+        }
+        term.write(`\r${line}`); // \r springt an den Zeilenanfang für den Überschreib-Effekt
+        counter++;
+    }, 50); // Geschwindigkeit des Glitches (in ms)
+}
+
+
+// --- ERSETZTER NACHRICHTEN-HANDLER ---
 ws.onmessage = (event) => {
-    // Always append incoming data to our buffer
-    backendBuffer += event.data;
+    try {
+        // Versuche, die Nachricht als JSON zu parsen.
+        const command = JSON.parse(event.data);
 
-    const actionPrefix = "ACTION:OPEN_URL:";
-    let actionIndex = backendBuffer.indexOf(actionPrefix);
-
-    // Check if the complete action string exists in our buffer
-    if (actionIndex !== -1) {
-        // Extract the part of the buffer after the action prefix
-        const urlPart = backendBuffer.substring(actionIndex + actionPrefix.length);
-        
-        // The URL is everything from there until the next newline character
-        const url = urlPart.split('\n')[0].trim();
-        
-        if (url) {
-            console.log(`ACTION: Opening URL: ${url}`);
-            window.open(url, '_blank');
+        // Prüfe, ob es unser spezielles Ereignis ist.
+        if (command.type === 'special_event') {
+            triggerGlitchEffect(command.payload);
         }
+        // Zukünftige Befehle wie 'open_url' könnten hier als 'else if' hinzugefügt werden.
 
-        // Clear the buffer so we don't process the action again
-        backendBuffer = '';
-
-        // We still need to ask the backend for a fresh prompt to keep the shell state clean
-        if (ws.readyState === WebSocket.OPEN) {
-            ws.send('\n');
-        }
-
-    } else {
-        // If no action string is found, write the whole buffer to the terminal
-        // and then clear it. xterm.js will handle rendering everything correctly.
-        term.write(backendBuffer);
-        backendBuffer = '';
+    } catch (e) {
+        // Wenn es kein gültiges JSON ist, behandle es als normalen Terminal-Text.
+        term.write(event.data);
     }
 };
+
 
 ws.onclose = () => {
     term.write('\r\n\r\nConnection [TERMINATED].');
