@@ -9,20 +9,6 @@ RUN chmod u+s /bin/su
 COPY container_files/motd /etc/motd
 COPY container_files/profile /etc/profile
 
-# --- SYSTEM-WIDE WRAPPER SETUP ---
-RUN mkdir -p /usr/override_bin
-COPY container_files/command_wrapper.sh /usr/local/bin/command_wrapper.sh
-RUN chmod +x /usr/local/bin/command_wrapper.sh
-RUN ln -s /usr/local/bin/command_wrapper.sh /usr/override_bin/cat
-RUN ln -s /usr/local/bin/command_wrapper.sh /usr/override_bin/less
-RUN ln -s /usr/local/bin/command_wrapper.sh /usr/override_bin/more
-RUN ln -s /usr/local/bin/command_wrapper.sh /usr/override_bin/head
-RUN ln -s /usr/local/bin/command_wrapper.sh /usr/override_bin/tail
-RUN ln -s /usr/local/bin/command_wrapper.sh /usr/override_bin/vi
-RUN ln -s /usr/local/bin/command_wrapper.sh /usr/override_bin/vim
-RUN ln -s /usr/local/bin/command_wrapper.sh /usr/override_bin/nano
-RUN echo 'export PATH=/usr/override_bin:$PATH' >> /etc/profile
-# --- END SYSTEM-WIDE SETUP ---
 
 RUN adduser -D -s /bin/bash terminal_user
 RUN chown -R terminal_user:terminal_user /home/terminal_user
