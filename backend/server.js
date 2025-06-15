@@ -3,6 +3,7 @@
 const express = require('express');
 const expressWs = require('express-ws');
 const pty = require('node-pty');
+const { exec } = require('child_process'); // Import exec
 
 const app = express();
 expressWs(app);
@@ -13,8 +14,12 @@ const dockerImageName = 'terminal-container';
 app.ws('/terminal', (ws, req) => {
     console.log('WebSocket connection established.');
 
+    // Generate a unique name for the container for this session
+    const containerName = `isopod-terminal-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+
     const ptyProcess = pty.spawn('docker', [
         'run', '--rm', '--interactive', '--tty',
+        `--name=${containerName}`, // Assign the unique name
         '--read-only',
         '--tmpfs', '/home/:rw,exec',
         '--network=none', '--cpus=0.5', '--memory=128m',
@@ -50,8 +55,22 @@ app.ws('/terminal', (ws, req) => {
         } else if (dataStr.startsWith(glitchRebootSignal)) {
             // Immersive glitch and reboot event
             console.log('[SERVER] Glitch Reboot event triggered by container.');
+            // 1. Tell frontend to start glitch sequence
             ws.send(JSON.stringify({ type: 'glitch_reboot_sequence' }));
 
+            // 2. Use docker exec to delete the file as root
+            const deleteCommandViaExec = `docker exec ${containerName} rm -f /home/investigator/test.sh`;
+            console.log(`[SERVER] Executing via docker exec: ${deleteCommandViaExec}`);
+            exec(deleteCommandViaExec, (error, stdout, stderr) => {
+                if (error) {
+                    console.error(`[SERVER] Error executing docker exec for rm: ${error.message}`);
+                    return;
+                }
+                if (stderr) {
+                    console.warn(`[SERVER] Stderr from docker exec for rm: ${stderr}`);
+                }
+                console.log(`[SERVER] Successfully executed rm via docker exec. stdout: ${stdout}`);
+            });
         } else {
             // Normale Daten, einfach weiterleiten.
             ws.send(data);
