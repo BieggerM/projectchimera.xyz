@@ -1,0 +1,22 @@
+Project Chimera - Equipment Request Form
+
+Date: 2025-06-15
+
+Requester: E. Vance, Lead Researcher, Project Chimera
+
+Department: Advanced AI Development
+
+Purpose of Request: Replacement and upgrade of standard computational hardware for research subjects.
+
+Itemized List:
+    Item: 10x High-Density Solid-State Drives (16TB each)
+        Justification: Existing storage solutions are nearing capacity due to increasing dataset complexity and volume for Subjects 01-06. Larger drives are necessary to maintain optimal system performance and prevent data fragmentation.
+        Urgency: Moderate
+    Item: 5x Enterprise-Grade Network Interface Cards (100GbE)
+        Justification: To improve data throughput and reduce latency for inter-module communication within the existing sandbox environment. Current network infrastructure is becoming a bottleneck for larger simulations.
+        Urgency: Moderate
+    Item: 1x Standard Office Chair (Ergonomic)
+        Justification: My current chair is exhibiting structural fatigue and is no longer providing adequate ergonomic support.
+        Urgency: Low
+
+Approval Status: Pending Department Head Review

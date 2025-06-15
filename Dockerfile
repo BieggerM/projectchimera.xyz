@@ -4,7 +4,7 @@ FROM alpine:latest
 
 # Style and flair
 COPY container_files/motd /etc/motd
-
+COPY container_files/profile /etc/profile
 
 # Install apk
 RUN apk add --no-cache bash shadow
@@ -36,4 +36,4 @@ RUN passwd -l root
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 
-CMD ["/bin/bash"]
+CMD ["/bin/bash", "--login"]
