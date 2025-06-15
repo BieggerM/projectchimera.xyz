@@ -17,17 +17,26 @@ app.ws('/terminal', (ws, req) => {
     // Generate a unique name for the container for this session
     const containerName = `isopod-terminal-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
 
-    const ptyProcess = pty.spawn('docker', [
+    const dockerRunArgs = [
         'run', '--rm', '--interactive', '--tty',
-        `--name=${containerName}`, // Assign the unique name
+        `--name=${containerName}`,
         '--read-only',
         '--tmpfs', '/home/:rw,exec',
         '--network=none', '--cpus=0.5', '--memory=128m',
         '--cap-drop=ALL', '--cap-add=SETUID', '--cap-add=SETGID', '--cap-add=CHOWN', '--cap-add=FOWNER',
         '--cap-add=DAC_OVERRIDE', '--cap-add=DAC_READ_SEARCH',
-        '--hostname', 'isopod', '--env', 'PS1=\\u@\\h:\\w\\$ ',
-        dockerImageName
-    ], { name: 'xterm-color', cols: 80, rows: 30, cwd: process.env.HOME, env: process.env });
+        '--hostname', 'CHIM-ALPHA',
+        dockerImageName,
+        'bash' 
+    ];
+
+    const ptyProcess = pty.spawn('docker', dockerRunArgs, { 
+        name: 'xterm-color', 
+        cols: 80, 
+        rows: 30, 
+        cwd: process.env.HOME, 
+        env: process.env 
+    });
 
     const specialEventSignal = 'ACTION:SPECIAL_EVENT:';
     const glitchRebootSignal = 'ACTION:EVENTS:GLITCHEVENT';
@@ -38,11 +47,8 @@ app.ws('/terminal', (ws, req) => {
         if (data.startsWith(specialEventSignal)) {
             // Log file creation event
             console.log('[SERVER] Special event triggered by container.');
-            
-            // Extrahiere den Dateinamen aus dem Signal.
             const logfileName = data.substring(specialEventSignal.length).trim();
 
-            // Erstelle ein JSON-Objekt als Befehl für das Frontend.
             const commandForFrontend = {
                 type: 'special_event',
                 payload: {

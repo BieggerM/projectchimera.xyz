@@ -35,9 +35,6 @@ term.open(termContainer);
 fitAddon.fit();
 window.addEventListener("resize", () => fitAddon.fit());
 
-term.write("Welcome to your fully interactive and secure web terminal!\r\n");
-term.write("Connecting to backend...\r\n");
-
 const websocketUrl = `ws://192.168.0.99:3000/terminal`;
 const ws = new WebSocket(websocketUrl);
 
