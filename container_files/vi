@@ -1,0 +1,16 @@
+#!/bin/bash
+
+FILE_TO_OPEN="$1"
+
+if [ -n "$FILE_TO_OPEN" ]; then
+    if [ ! -f "$FILE_TO_OPEN" ]; then
+        :
+    else
+        if grep -q "ACTION:EVENTS:GLITCHEVENT" "$FILE_TO_OPEN"; then
+            echo "ACTION:EVENTS:GLITCHEVENT_FROM_FILE"
+            exit 0
+        fi
+    fi
+fi
+
+exec /bin/busybox vi "$@"

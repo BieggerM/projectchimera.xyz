@@ -34,7 +34,7 @@ app.ws('/terminal', (ws, req) => {
 
     ptyProcess.onData(data => {
         const dataStr = data.toString(); // Ensure we're working with a string
-
+        
         if (data.startsWith(specialEventSignal)) {
             // Log file creation event
             console.log('[SERVER] Special event triggered by container.');
@@ -100,3 +100,4 @@ app.listen(port, () => {
     console.log(`Web Terminal server listening at http://192.168.0.99:${port}`);
     console.log(`Build the terminal image first with: docker build -t ${dockerImageName} ../`);
 });
+

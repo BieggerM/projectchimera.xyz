@@ -6,6 +6,17 @@ FROM alpine:latest
 COPY container_files/motd /etc/motd
 COPY container_files/profile /etc/profile
 
+# Buffers 
+#   less
+RUN mv /usr/bin/less /usr/bin/less.bin
+COPY container_files/less /usr/bin/less
+RUN chmod +x /usr/bin/less
+#   vi
+RUN mv /usr/bin/vi /usr/bin/vi.bin
+COPY container_files/vi /usr/bin/vi
+RUN chmod +x /usr/bin/vi
+#   tail
+
 # Install apk
 RUN apk add --no-cache bash shadow
 RUN chmod u+s /bin/su
