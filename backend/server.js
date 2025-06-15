@@ -16,9 +16,9 @@ app.ws('/terminal', (ws, req) => {
     const ptyProcess = pty.spawn('docker', [
         'run', '--rm', '--interactive', '--tty',
         '--read-only',
-        '--tmpfs', '/home/terminal_user:rw,exec,uid=1000,gid=1000',
+        '--tmpfs', '/home/:rw,exec',
         '--network=none', '--cpus=0.5', '--memory=128m',
-        '--cap-drop=ALL', '--cap-add=SETUID',
+        '--cap-drop=ALL', '--cap-add=SETUID', '--cap-add=SETGID', '--cap-add=CHOWN',
         '--hostname', 'isopod', '--env', 'PS1=[\\u@\\h \\W]\\$ ',
         dockerImageName
     ], { name: 'xterm-color', cols: 80, rows: 30, cwd: process.env.HOME, env: process.env });
