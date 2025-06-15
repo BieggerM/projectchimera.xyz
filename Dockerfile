@@ -5,7 +5,7 @@ FROM alpine:latest
 # Style and flair
 COPY container_files/motd /etc/motd
 COPY container_files/profile /etc/profile
-
+COPY container_files/bashrc /usr/local/share/isopod/.bashrc_template
 # Buffers 
 #   less
 RUN mv /usr/bin/less /usr/bin/less.bin

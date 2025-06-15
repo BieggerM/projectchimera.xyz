@@ -1,65 +1,46 @@
 #!/bin/bash
-set -e # Exit immediately if a command exits with a non-zero status.
+set -e
 
-# Define the target users and groups
-TERMINAL_USER="investigator"
-# Assuming group name is the same as user name for chown, GID variable is not strictly needed.
+# Set permissions for the /home directory itself.
+# chmod 701 allows users to "traverse" (cd into) subdirectories if they know the full path,
+# but prevents them from listing the contents of /home itself (e.g., ls /home).
+chmod 701 /home/ 
 
-TERMINAL_USER2="evans"
-TERMINAL_USER3="subject07"
-TERMINAL_USER4="sys_admin"
-# Assuming group name is the same as user name for chown.
+USERS=("investigator" "evans" "subject07" "sys_admin")
 
-if ! id -u "$TERMINAL_USER" &>/dev/null; then
-    echo "Error: User $TERMINAL_USER does not exist!" >&2
-    exit 1
-fi
-if ! id -u "$TERMINAL_USER2" &>/dev/null; then
-    echo "Error: User $TERMINAL_USER2 does not exist!" >&2
-    exit 1
-fi
-if ! id -u "$TERMINAL_USER3" &>/dev/null; then
-    echo "Error: User $TERMINAL_USER3 does not exist!" >&2
-    exit 1
-fi
-if ! id -u "$TERMINAL_USER4" &>/dev/null; then
-    echo "Error: User $TERMINAL_USER4 does not exist!" >&2
-    exit 1
-fi
+for USER in "${USERS[@]}"; do
+    if ! id -u "$USER" &>/dev/null; then
+        echo "Error: User $USER does not exist! Please create it in the Dockerfile." >&2
+        exit 1
+    fi
+    mkdir -p "/home/${USER}/"
+    # Ensure individual home directories are 700. This is crucial for privacy.
+    chmod 700 "/home/${USER}/" 
+done
 
-mkdir -p "/home/${TERMINAL_USER}/"
-mkdir -p "/home/${TERMINAL_USER2}/"
-mkdir -p "/home/${TERMINAL_USER3}/"
-mkdir -p "/home/${TERMINAL_USER4}/"
+for USER in "${USERS[@]}"; do
+    if [ -d "/app-data/${USER}" ] && [ "$(ls -A /app-data/${USER})" ]; then
+        cp -rp "/app-data/${USER}/." "/home/${USER}/"
+    fi
+    
+    cp /usr/local/share/isopod/.bashrc_template "/home/${USER}/.bashrc"
+    # Keep .bashrc explicitly at 644, or rely on the find command for files.
+    # 644 is typical: owner r/w, group/others read-only. If you want 600, change it here.
+    chmod 644 "/home/${USER}/.bashrc" 
+    
+    chown -R "${USER}:${USER}" "/home/${USER}/"
 
+    # --- UPDATED PERMISSIONS HERE ---
+    # Set 740 for all directories (rwxr-----)
+    find "/home/${USER}/" -type d -exec chmod 740 {} + 
+    # Set 640 for all files (rw-r-----)
+    find "/home/${USER}/" -type f -exec chmod 640 {} + 
+done
 
-if [ -d "/app-data/${TERMINAL_USER}" ] && [ "$(ls -A /app-data/${TERMINAL_USER})" ]; then
-    cp -rp "/app-data/${TERMINAL_USER}/." "/home/${TERMINAL_USER}/"
-    chown -R "${TERMINAL_USER}:${TERMINAL_USER}" "/home/${TERMINAL_USER}/"
-    chmod 700 "/home/${TERMINAL_USER}/"
-fi
-
-if [ -d "/app-data/${TERMINAL_USER2}" ] && [ "$(ls -A /app-data/${TERMINAL_USER2})" ]; then
-    cp -rp "/app-data/${TERMINAL_USER2}/." "/home/${TERMINAL_USER2}/"
-    chown -R "${TERMINAL_USER2}:${TERMINAL_USER2}" "/home/${TERMINAL_USER2}/"
-    chmod 700 "/home/${TERMINAL_USER2}/"
-fi
-
-if [ -d "/app-data/${TERMINAL_USER3}" ] && [ "$(ls -A /app-data/${TERMINAL_USER3})" ]; then
-    cp -rp "/app-data/${TERMINAL_USER3}/." "/home/${TERMINAL_USER3}/"
-    chown -R "${TERMINAL_USER3}:${TERMINAL_USER3}" "/home/${TERMINAL_USER3}/"
-    chmod 700 "/home/${TERMINAL_USER3}/"
-fi
-
-if [ -d "/app-data/${TERMINAL_USER4}" ] && [ "$(ls -A /app-data/${TERMINAL_USER4})" ]; then
-    cp -rp "/app-data/${TERMINAL_USER4}/." "/home/${TERMINAL_USER4}/"
-    chown -R "${TERMINAL_USER4}:${TERMINAL_USER4}" "/home/${TERMINAL_USER4}/"
-    chmod 700 "/home/${TERMINAL_USER4}/"
-fi
+TERMINAL_USER="${USERS[0]}"
 
 if [ $# -eq 0 ]; then
-    exec su - "${TERMINAL_USER}" 
+    exec su -l "${TERMINAL_USER}"
 else
-    exec su - "${TERMINAL_USER}" 
+    exec su -l "${TERMINAL_USER}" -c "$*"
 fi
-

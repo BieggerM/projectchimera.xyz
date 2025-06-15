@@ -13,7 +13,7 @@ const dockerImageName = 'terminal-container';
 
 app.ws('/terminal', (ws, req) => {
     console.log('WebSocket connection established.');
-
+    
     // Generate a unique name for the container for this session
     const containerName = `isopod-terminal-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
 
