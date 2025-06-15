@@ -7,6 +7,11 @@ if [ -f "/etc/bash.bashrc" ]; then
     . "/etc/bash.bashrc"
 fi
 
+if [ -f "/etc/motd" ]; then
+    MOTD_CONTENT=$(cat "/etc/motd")
+    echo -e "${MOTD_CONTENT}"
+fi
+
 export PS1='\[\e[0;32m\]\u@\h:\[\e[0;34m\]\w\[\e[0m\]\$ '
 
 export TMPS_BASHRC_LOADED="true"

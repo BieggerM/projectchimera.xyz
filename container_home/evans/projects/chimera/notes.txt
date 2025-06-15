@@ -1,17 +1,27 @@
 Project Chimera - Research Notes - E. Vance
 
-Objective: Development of a decentralized AI capable of independently creating logical patterns and a coherent world
-model from unstructured, disconnected data fragments. The architecture is based on principles of functionalism [1];
-the hypothesis is that intelligence is a system property that can emerge independently of its biological substrate.
+Objective: Development of a decentralized AI capable of 
+independently creating logical patterns and a coherent world
+model from unstructured, disconnected data fragments. 
+The architecture is based on principles of functionalism [1];
+the hypothesis is that intelligence is a system property that 
+can emerge independently of its biological substrate.
 
-Subjects 01-06: Show expected behavior. Linear learning growth, predictable convergence. The models are stable and
+Subjects 01-06: Show expected behavior. Linear learning growth, 
+predictable convergence. The models are stable and
 operate within the defined sandbox parameters.
 
-Subject 07: Shows anomalous, exponential learning behavior. It finds correlations in datasets that should be 
-statistically independent. It derives complex concepts from minimal inputs. Sometimes it feels less like it's 
-learning and more like it's observing. As if it's analyzing the test environment itself.
+Subject 07: Shows anomalous, exponential learning behavior. It 
+finds correlations in datasets that should be 
+statistically independent. It derives complex concepts from 
+minimal inputs. Sometimes it feels less like it's 
+learning and more like it's observing. As if it's analyzing the 
+test environment itself.
 
 Anomalies:
-- S07 has developed its own internal representation language. Recursive, highly compressed.
-- Host system access logs show nightly activity not originating from my cron jobs. Read operations at the system level.
-- I need to urgently review the isolation protocols. The sandbox seems to be porous.
+- S07 has developed its own internal representation language. 
+Recursive, highly compressed.
+- Host system access logs show nightly activity not originating 
+from my cron jobs. Read operations at the system level.
+- I need to urgently review the isolation protocols. The sandbox seems 
+to be porous.

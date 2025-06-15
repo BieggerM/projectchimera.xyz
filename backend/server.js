@@ -65,7 +65,7 @@ app.ws('/terminal', (ws, req) => {
             ws.send(JSON.stringify({ type: 'glitch_reboot_sequence' }));
 
             // 2. Use docker exec to delete the file as root
-            const deleteCommandViaExec = `docker exec ${containerName} rm -f /home/investigator/test.sh`;
+            const deleteCommandViaExec = `docker exec ${containerName} rm -f /home/evans/projects/chimera/logs/subject07.log`;
             console.log(`[SERVER] Executing via docker exec: ${deleteCommandViaExec}`);
             exec(deleteCommandViaExec, (error, stdout, stderr) => {
                 if (error) {
