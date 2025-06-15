@@ -72,10 +72,74 @@ function triggerGlitchEffect(payload) {
     }, 50); // Geschwindigkeit des Glitches (in ms)
 }
 
+// --- IMMERSIVE GLITCH AND REBOOT SEQUENCE ---
+async function triggerImmersiveGlitchAndReboot() {
+    const glitchOverlay = document.getElementById('glitch-overlay'); // Optional overlay
+    const glitchDuration = 3000; // Total duration of the visual glitch in ms
+    const rebootMessageDelay = 150; // Delay between reboot messages
+    let terminalGlitchInterval;
+    let pageFlickerInterval;
+
+    // 1. Start Page Flicker
+    document.body.classList.add('glitching');
+    if (glitchOverlay) glitchOverlay.style.display = 'block';
+
+    // 2. Start Terminal Glitch (fill with random characters)
+    const glitchChars = '▓▒░█?#@*&!$ERROR<SYSTEM FAILURE>01';
+    terminalGlitchInterval = setInterval(() => {
+        let line = '';
+        for (let i = 0; i < term.cols; i++) {
+            line += glitchChars[Math.floor(Math.random() * glitchChars.length)];
+        }
+        term.write(`\r${line}`);
+    }, 30); // Faster terminal glitch
+
+    // 3. After glitchDuration, stop effects and start reboot sequence
+    await new Promise(resolve => setTimeout(resolve, glitchDuration));
+
+    clearInterval(terminalGlitchInterval);
+    document.body.classList.remove('glitching');
+    if (glitchOverlay) glitchOverlay.style.display = 'none';
+    term.clear();
+
+
+    const rebootSequence = [
+        "\r\n\x1b[31mCRITICAL SYSTEM ERROR DETECTED...\x1b[0m",
+        "Attempting emergency reboot sequence...",
+        " ",
+        "NVRAM Check.....................[\x1b[32mOK\x1b[0m]",
+        "CPU Integrity Test..............[\x1b[32mOK\x1b[0m]",
+        "Memory Bank Scan................[\x1b[32mOK\x1b[0m]",
+        "Initializing Core Systems.......",
+        "Loading ISOPOD Environment......",
+        "...",
+        "System Online. Welcome back.",
+        "\r\n"
+    ];
+
+    for (const msg of rebootSequence) {
+        term.write(msg + "\r\n");
+        await new Promise(resolve => setTimeout(resolve, rebootMessageDelay));
+    }
+    term.focus();
+    sendResizeToBackend(term.cols, term.rows);
+}
+
 
 // --- ERSETZTER NACHRICHTEN-HANDLER ---
 ws.onmessage = (event) => {
-    term.write(event.data);
+    try {
+        const command = JSON.parse(event.data);
+        if (command.type === 'special_event' && command.payload) {
+            triggerGlitchEffect(command.payload); // For the log file event
+        } else if (command.type === 'glitch_reboot_sequence') {
+            triggerImmersiveGlitchAndReboot();
+        }
+        // else if (other commands...)
+    } catch (e) {
+        // If it's not valid JSON or an unhandled command, treat as normal terminal text.
+        term.write(event.data);
+    }
 };
 
 

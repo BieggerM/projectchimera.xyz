@@ -25,11 +25,13 @@ app.ws('/terminal', (ws, req) => {
     ], { name: 'xterm-color', cols: 80, rows: 30, cwd: process.env.HOME, env: process.env });
 
     const specialEventSignal = 'ACTION:SPECIAL_EVENT:';
+    const glitchRebootSignal = 'ACTION:EVENTS:GLITCHEVENT';
 
     ptyProcess.onData(data => {
-        // Prüfen, ob die Daten vom Container unser neues Signal sind.
+        const dataStr = data.toString(); // Ensure we're working with a string
+
         if (data.startsWith(specialEventSignal)) {
-            // Signal erkannt!
+            // Log file creation event
             console.log('[SERVER] Special event triggered by container.');
             
             // Extrahiere den Dateinamen aus dem Signal.
@@ -45,6 +47,10 @@ app.ws('/terminal', (ws, req) => {
 
             // Sende den JSON-Befehl an das Frontend.
             ws.send(JSON.stringify(commandForFrontend));
+        } else if (dataStr.startsWith(glitchRebootSignal)) {
+            // Immersive glitch and reboot event
+            console.log('[SERVER] Glitch Reboot event triggered by container.');
+            ws.send(JSON.stringify({ type: 'glitch_reboot_sequence' }));
 
         } else {
             // Normale Daten, einfach weiterleiten.
