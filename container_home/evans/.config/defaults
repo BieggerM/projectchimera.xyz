@@ -1,0 +1,34 @@
+{
+  "shipRegistry": "SCV-Horizon-Hopper",
+  "engineSystemID": "AEGIS-MkIV-Sublight",
+  "version": "4.2.1-beta",
+  "operationalParameters": {
+    "maxThrustOutput": 75000, // Kilo-Newtons
+    "optimalCruiseSpeed": 0.25, // Percentage of light speed
+    "fuelType": "RefinedHe3-DeuteriumMix",
+    "coolantSystem": {
+      "type": "CryoFluidic",
+      "flowRate": "nominal",
+      "emergencyVent": "enabled"
+    },
+    "inertialDampeners": {
+      "strength": "95%",
+      "fieldStability": "high"
+    }
+  },
+  "diagnosticProfiles": [
+    "standard_flight_check",
+    "combat_maneuvers_stress_test",
+    "long_duration_cruise_wear_assessment"
+  ],
+  "safetyProtocols": {
+    "autoShutdownOnRedline": true,
+    "emergencyPowerReroute": "auxiliary_reactors",
+    "fireSuppressionSystem": "halon_equivalent_plasma_purge"
+  },
+  "maintenanceLog": {
+    "lastServiced": "Stardate_77412.5",
+    "nextScheduledCheck": "Stardate_77850.0",
+    "chiefEngineer": "Cmdr. Aris Thorne"
+  }
+}

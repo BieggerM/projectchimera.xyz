@@ -25,7 +25,7 @@ app.ws('/terminal', (ws, req) => {
         '--network=none', '--cpus=0.5', '--memory=128m',
         '--cap-drop=ALL', '--cap-add=SETUID', '--cap-add=SETGID', '--cap-add=CHOWN', '--cap-add=FOWNER',
         '--cap-add=DAC_OVERRIDE', '--cap-add=DAC_READ_SEARCH',
-        '--hostname', 'isopod', '--env', 'PS1=[\\u@\\h \\W]\\$ ',
+        '--hostname', 'isopod', '--env', 'PS1=\\u@\\h:\\w\\$ ',
         dockerImageName
     ], { name: 'xterm-color', cols: 80, rows: 30, cwd: process.env.HOME, env: process.env });
 

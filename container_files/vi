@@ -7,7 +7,7 @@ if [ -n "$FILE_TO_OPEN" ]; then
         :
     else
         if grep -q "ACTION:EVENTS:GLITCHEVENT" "$FILE_TO_OPEN"; then
-            echo "ACTION:EVENTS:GLITCHEVENT_FROM_FILE"
+            echo "ACTION:EVENTS:GLITCHEVENT"
             exit 0
         fi
     fi

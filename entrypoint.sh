@@ -27,7 +27,6 @@ if ! id -u "$TERMINAL_USER4" &>/dev/null; then
     exit 1
 fi
 
-
 mkdir -p "/home/${TERMINAL_USER}/"
 mkdir -p "/home/${TERMINAL_USER2}/"
 mkdir -p "/home/${TERMINAL_USER3}/"
@@ -58,12 +57,9 @@ if [ -d "/app-data/${TERMINAL_USER4}" ] && [ "$(ls -A /app-data/${TERMINAL_USER4
     chmod 700 "/home/${TERMINAL_USER4}/"
 fi
 
-# Execute the CMD (e.g., /bin/bash from Dockerfile) as the primary terminal_user
-# If "$@" is empty (no command passed to `docker run`), start a login shell for TERMINAL_USER.
-# If "$@" is not empty, execute the provided command as TERMINAL_USER.
 if [ $# -eq 0 ]; then
-    exec su - "${TERMINAL_USER}" -s /bin/bash
+    exec su - "${TERMINAL_USER}" 
 else
-    exec su - "${TERMINAL_USER}" -c "$*" 
+    exec su - "${TERMINAL_USER}" 
 fi
 

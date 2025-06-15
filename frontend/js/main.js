@@ -55,9 +55,9 @@ ws.onmessage = (event) => {
       triggerGlitchEffect(term, command.payload);
     } else if (command.type === "glitch_reboot_sequence") {
       triggerImmersiveGlitchAndReboot(term, ws, sendResizeToBackend);
-    } 
-
-    term.write(event.data);
+    } else {
+      term.write(event.data);
+    }
   } catch (e) {
     term.write(event.data);
   }

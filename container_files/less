@@ -12,4 +12,4 @@ if grep -q "ACTION:EVENTS:GLITCHEVENT" "$FILE_TO_OPEN"; then
     exit 0
 fi
 
-exec /usr/bin/less.bin "$@" 
+exec /bin/busybox less "$@" 

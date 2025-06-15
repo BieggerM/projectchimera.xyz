@@ -30,7 +30,6 @@ function triggerGlitchEffect(term, payload) {
 async function triggerImmersiveGlitchAndReboot(term, ws, sendResizeToBackendCallback) {
   const glitchOverlay = document.getElementById("glitch-overlay"); // Optional overlay
   const glitchDuration = 3000; // Total duration of the visual glitch in ms
-  const rebootMessageDelay = 150; // Delay between reboot messages
   const preGlitchMessageDelay = 200; // Delay for pre-glitch messages
   let terminalGlitchInterval;
 
@@ -51,12 +50,10 @@ async function triggerImmersiveGlitchAndReboot(term, ws, sendResizeToBackendCall
   }
   await new Promise((resolve) => setTimeout(resolve, 500)); // Pause before full glitch
 
-  // 1. Start Page Flicker
   document.body.classList.add("glitching");
   if (glitchOverlay) glitchOverlay.style.display = "block";
 
-  // 2. Start Terminal Glitch (fill with random characters)
-  const glitchChars = "▓▒░█?#@*&!$ERROR<SYS_FAIL>0101010<CRITICAL>%^!@#";
+  const glitchChars = "▓▒░█?#@*&! $ERROR <SYS_FAIL>0  101010 <CRITICAL> %^!@#";
   terminalGlitchInterval = setInterval(() => {
     let line = "";
     for (let i = 0; i < term.cols; i++) {
@@ -66,7 +63,6 @@ async function triggerImmersiveGlitchAndReboot(term, ws, sendResizeToBackendCall
     term.write("\r\n");
   }, 30); // Faster terminal glitch
 
-  // 3. After glitchDuration, stop effects and start reboot sequence
   await new Promise((resolve) => setTimeout(resolve, glitchDuration));
 
   clearInterval(terminalGlitchInterval);
