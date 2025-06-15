@@ -2,25 +2,34 @@
 
 FROM alpine:latest
 
+# Style and flair
 COPY container_files/motd /etc/motd
-COPY container_files/profile /etc/profile
 
+
+# Install apk
 RUN apk add --no-cache bash shadow
-
+RUN chmod u+s /bin/su
 # Copy entrypoint script into the container
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Copy User Home dirs to overwrite tmpfs later
-COPY ./container_home/terminal_user /app-data/terminal_user_files/
-COPY ./container_home/terminal_user2 /app-data/terminal_user2_files/
+COPY ./container_home/investigator /app-data/investigator/
+COPY ./container_home/evans /app-data/evans/
+COPY ./container_home/sys_admin /app-data/sys_admin/
+COPY ./container_home/subject07 /app-data/subject07/
 
 # Users
-RUN adduser -D -s /bin/bash terminal_user
-RUN adduser -D -s /bin/bash terminal_user2 
+RUN adduser -D -s /bin/bash investigator
+RUN adduser -D -s /bin/bash evans
+RUN adduser -D -s /bin/bash sys_admin
+RUN adduser -D -s /bin/bash subject07
+
 
 # Chpasswd  
-RUN echo "terminal_user2:test" | chpasswd
+RUN echo "evans:Orion1977" | chpasswd
+RUN echo "sys_admin:MontBlanc" | chpasswd
+RUN echo "subject07:null_geburt" | chpasswd
 RUN passwd -l root
 
 
