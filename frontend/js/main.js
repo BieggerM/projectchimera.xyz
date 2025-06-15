@@ -42,17 +42,6 @@ term.write('Connecting to backend...\r\n');
 const websocketUrl = `ws://192.168.0.99:3000/terminal`;
 const ws = new WebSocket(websocketUrl);
 
-function sendResizeToBackend(cols, rows) {
-    if (ws.readyState === WebSocket.OPEN) {
-        const message = JSON.stringify({
-            type: 'resize',
-            cols: cols,
-            rows: rows
-        });
-        ws.send(message);
-    }
-}
-
 ws.onopen = () => {
     term.write('Connection [ESTABLISHED].\r\n\r\n');
     term.focus();
@@ -86,20 +75,7 @@ function triggerGlitchEffect(payload) {
 
 // --- ERSETZTER NACHRICHTEN-HANDLER ---
 ws.onmessage = (event) => {
-    try {
-        // Versuche, die Nachricht als JSON zu parsen.
-        const command = JSON.parse(event.data);
-
-        // Prüfe, ob es unser spezielles Ereignis ist.
-        if (command.type === 'special_event') {
-            triggerGlitchEffect(command.payload);
-        }
-        // Zukünftige Befehle wie 'open_url' könnten hier als 'else if' hinzugefügt werden.
-
-    } catch (e) {
-        // Wenn es kein gültiges JSON ist, behandle es als normalen Terminal-Text.
-        term.write(event.data);
-    }
+    term.write(event.data);
 };
 
 
@@ -120,3 +96,9 @@ term.onData(data => {
 term.onResize(({ cols, rows }) => {
     sendResizeToBackend(cols, rows);
 });
+
+function sendResizeToBackend(cols, rows) {
+    if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'resize', cols, rows }));
+    }
+}

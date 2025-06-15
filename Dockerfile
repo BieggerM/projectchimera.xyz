@@ -1,13 +1,11 @@
 # Dockerfile
 
 FROM alpine:latest
+
 COPY container_files/motd /etc/motd
 COPY container_files/profile /etc/profile
 
-
 RUN apk add --no-cache bash shadow
-
-RUN chmod u+s /bin/su
 
 # Copy entrypoint script into the container
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh

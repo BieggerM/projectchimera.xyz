@@ -56,6 +56,8 @@ app.ws('/terminal', (ws, req) => {
             const command = JSON.parse(message);
             if (command.type === 'resize' && command.cols && command.rows) {
                 ptyProcess.resize(command.cols, command.rows);
+            } else {
+                ptyProcess.write(message);
             }
         } catch (e) {
             ptyProcess.write(message);
