@@ -1,0 +1,39 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.npm/
+.npmrc
+npm-shrinkwrap.json
+package-lock.json # If you prefer not to commit package-lock.json
+
+# Logs
+logs/
+*.log
+*.log.*
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Runtime files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+.DS_Store
+.nyc_output/
+/coverage
+/.next/ # For Next.js projects
+/.svelte-kit/ # For SvelteKit projects
+/.vercel/ # For Vercel deployments
+/out/ # For various build outputs
+
+# Database (SQLite)
+# Your SQLite database file
+user_inputs.db
+*.sqlite
+*.sqlite3
