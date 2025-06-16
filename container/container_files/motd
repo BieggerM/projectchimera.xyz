@@ -1,0 +1,23 @@
+Welcome to Project Chimera Secure Access Terminal (CHIMERA-ALPHA)
+All activity logged. Unauthorized access prohibited.
+
+\x1b[34m ██████╗██╗  ██╗██╗███╗   ███╗       █████╗ ██╗     ██████╗ ██╗  ██╗ █████╗
+\x1b[34m██╔════╝██║  ██║██║████╗ ████║      ██╔══██╗██║     ██╔══██╗██║  ██║██╔══██╗
+\x1b[34m██║     ███████║██║██╔████╔██║█████╗███████║██║     ██████╔╝███████║███████║
+\x1b[34m██║     ██╔══██║██║██║╚██╔╝██║╚════╝██╔══██║██║     ██╔═══╝ ██╔══██║██╔══██║
+\x1b[34m╚██████╗██║  ██║██║██║ ╚═╝ ██║      ██║  ██║███████╗██║     ██║  ██║██║  ██║
+\x1b[34m ╚═════╝╚═╝  ╚═╝╚═╝╚═╝     ╚═╝      ╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝\x1b[0m
+
+Alpine Linux 3.19
+Server hostname: CHIMERA-ALPHA
+Kernel: 6.2.0-alpine
+Uptime: 0 days, 0 hours, 0 minutes, 20 seconds
+
+---
+\x1b[33mSYSTEM ALERT: ONGOING INVESTIGATION\x1b[0m
+This system is currently under forensic investigation by authorized third-party personnel.
+All system data, logs, and network activity are being monitored and analyzed.
+Standard operational procedures remain in effect. Unauthorized access or interference
+with investigative processes is strictly prohibited and will be reported to security.
+Review /var/log/system_events.log for recent activity.
+---

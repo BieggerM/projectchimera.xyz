@@ -1,45 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fully Interactive Terminal</title>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Mono:wght@400&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" />
-    
-    <style>
-    :root {
-        --background: #1a1b26;
-    }
-    html, body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-        background-color: var(--background);
-    }
-    
-    /* --- THIS IS THE UPDATED CSS BLOCK --- */
-    #terminal-container {
-        width: 100%;
-        height: 100%;
-        
-        /* FIX 1: Add padding for a nice margin around the terminal */
-        padding: 10px;
-        padding-top: 10px;
 
-        /* FIX 2: Ensure padding is included in the element's total size */
-        box-sizing: border-box;
-    }
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" />
+
+    <style>
+        :root {
+            --background: #1a1b26;
+        }
+
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            ;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background);
+            overflow-x: hidden;
+        }
+
+        /* --- THIS IS THE UPDATED CSS BLOCK --- */
+        #terminal-container {
+            width: 100%;
+            height: 100%;
+
+            /* FIX 1: Add padding for a nice margin around the terminal */
+            padding: 10px;
+            padding-top: 10px;
+
+        }
+
+        body.glitching {
+            animation: flickerAnimation 0.1s infinite;
+        }
+
+        @keyframes flickerAnimation {
+            0% {
+                opacity: 1;
+                background-color: #1a1b26;
+            }
+            /* Red flash */
+            50% {
+                opacity: 1;
+                background-color: #FFFFFF;
+            } 
+            100% {
+                opacity: 1;
+                background-color: #1a1b26;
+            }
+        }
+        #glitch-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            display: none;
+            pointer-events: none;
+        }
     </style>
+    <script src="js/main.js" defer></script>
+    <script src="js/animations.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
 </head>
+
 <body>
     <div id="terminal-container"></div>
-
-    <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
-
-    <script type="module" src="js/main.js"></script>
+    <div id="glitch-overlay"></div>
 </body>
+
 </html>

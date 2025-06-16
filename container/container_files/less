@@ -1,0 +1,15 @@
+#!/bin/bash
+
+FILE_TO_OPEN="$1"
+
+if [ ! -f "$FILE_TO_OPEN" ]; then
+    echo "less: $FILE_TO_OPEN: No such file or directory" >&2
+    exit 1
+fi
+
+if grep -q "ACTION:EVENTS:GLITCHEVENT" "$FILE_TO_OPEN"; then
+    echo "ACTION:EVENTS:GLITCHEVENT_FROM_FILE"
+    exit 0
+fi
+
+exec /bin/busybox less "$@" 
