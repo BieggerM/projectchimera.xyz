@@ -42,6 +42,11 @@ ws.onopen = () => {
   term.write("Connection [ESTABLISHED].\r\n\r\n");
   term.focus();
   sendResizeToBackend(term.cols, term.rows);
+  pingIntervalId = setInterval(() => {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'ping' }));
+    }
+  }, 5000); // Send a ping every 5 seconds
 };
 
 // --- ERSETZTER NACHRICHTEN-HANDLER ---
@@ -55,9 +60,11 @@ ws.onmessage = (event) => {
     } else if (command.type === "game_complete") { 
       console.log("Game complete signal received!");
       showEndScreen();
+    } else if (command.type === 'pong') {
+      // console.log("Received WebSocket pong."); // For debugging
     } else {
       term.write(event.data);
-    }
+    } 
   } catch (e) {
     term.write(event.data);
   }

@@ -4,6 +4,7 @@ const express = require('express');
 const expressWs = require('express-ws');
 const pty = require('node-pty');
 const { exec } = require('child_process'); // Import exec
+const WebSocket = require('ws');
 
 const app = express();
 expressWs(app);
@@ -43,7 +44,6 @@ app.ws('/terminal', (ws, req) => {
 
     ptyProcess.onData(data => {
         const dataStr = data.toString(); // Ensure we're working with a string
-        
         if (dataStr.includes(glitchRebootSignal)) {
             handleGlitchEvent(ws, containerName);
         } else if (dataStr.includes(endgameSignal)) {
@@ -59,9 +59,14 @@ app.ws('/terminal', (ws, req) => {
             const command = JSON.parse(message);
             if (command.type === 'resize' && command.cols && command.rows) {
                 ptyProcess.resize(command.cols, command.rows);
+            } else if (command.type === 'ping') { 
+                if (ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({ type: 'pong' }));
+                    //console.log("Received ping, sent pong."); // For debugging
+                }
             } else {
                 ptyProcess.write(message);
-            }
+            } 
         } catch (e) {
             ptyProcess.write(message);
         }
