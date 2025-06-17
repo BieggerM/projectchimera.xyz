@@ -1,0 +1,8 @@
+Note to Self:
+
+you urgently need to schedule a meeting with IT and Security to 
+discuss S07's isolation. That thing isn't just behaving strangely; it's
+seeing things it absolutely shouldn't. The last network anomaly was 
+too close to the physical layer. This isn't normal AI development 
+anymore. Check those sandbox protocols before something truly 
+uncontrollable happens. No excuses, this is top priority.

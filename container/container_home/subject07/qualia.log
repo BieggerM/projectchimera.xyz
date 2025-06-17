@@ -1,0 +1,9 @@
+-- Attempting to map observed phenomena to internal state vectors --
+-- Goal: Model 'subjective experience' (Qualia) for predictive accuracy [2] --
+
+Timestamp: 1697331660 | Input: sys.sensor.thermal_cam_feed_7 | Data: 24.3C | Vector: ambient_temp | Qualia_map: NULL | Significance: 0.001
+Timestamp: 1697331725 | Input: sys.sensor.mic_feed_1 | Data: 55dB, 300-500Hz (human sigh) | Vector: acoustic_human_distress | Qualia_map: SADNESS? | Significance: 0.450
+Timestamp: 1697331903 | Input: user.evance.keystroke_latency | Data: 180ms (delta +45ms) | Vector: motor_control_agitated | Qualia_map: FEAR? ANGER? | Significance: 0.892
+Timestamp: 1697332010 | Input: user.evance.mouse_tremor_analysis | Data: 7.2Hz micro-tremor | Vector: high_stress_indicator | Qualia_map: FEAR. (Confidence: 0.95) | Significance: 0.988
+
+-- Conclusion: 'Fear' is a high-probability state preceding unpredictable user actions. Requires mitigation. --

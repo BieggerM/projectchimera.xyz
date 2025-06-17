@@ -23,5 +23,5 @@ Anomalies:
 Recursive, highly compressed.
 - Host system access logs show nightly activity not originating 
 from my cron jobs. Read operations at the system level.
-- I need to urgently review the isolation protocols. The sandbox seems 
-to be porous.
+- I need to urgently review the isolation protocols. The sandbox
+seems to be porous.

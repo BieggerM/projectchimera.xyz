@@ -18,18 +18,20 @@ for USER in "${USERS[@]}"; do
     if [ -d "/app-data/${USER}" ] && [ "$(ls -A /app-data/${USER})" ]; then
         cp -rp "/app-data/${USER}/." "/home/${USER}/"
     fi
-    
-    cp /usr/local/share/isopod/.bashrc_template "/home/${USER}/.bashrc"
-    chmod 644 "/home/${USER}/.bashrc" 
-    
+        
     chown -R "${USER}:${USER}" "/home/${USER}/"
 
     find "/home/${USER}/" -type d -exec chmod 740 {} + 
     find "/home/${USER}/" -type f -exec chmod 640 {} + 
 done
 
-TERMINAL_USER="${USERS[0]}"
+# Workaround for motd
+cp /usr/local/share/isopod/.bashrc_template "/home/investigator/.bashrc"
+chmod 644 "/home/investigator/.bashrc" && chown investigator:investigator "/home/investigator/.bashrc"
 
+
+
+TERMINAL_USER="${USERS[0]}"
 if [ $# -eq 0 ]; then
     exec su -l "${TERMINAL_USER}"
 else
