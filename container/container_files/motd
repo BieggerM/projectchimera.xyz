@@ -19,5 +19,4 @@ This system is currently under forensic investigation by authorized third-party 
 All system data, logs, and network activity are being monitored and analyzed.
 Standard operational procedures remain in effect. Unauthorized access or interference
 with investigative processes is strictly prohibited and will be reported to security.
-Review /var/log/system_events.log for recent activity.
 ---
