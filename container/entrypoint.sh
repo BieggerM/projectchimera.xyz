@@ -30,7 +30,6 @@ cp /usr/local/share/isopod/.bashrc_template "/home/investigator/.bashrc"
 chmod 644 "/home/investigator/.bashrc" && chown investigator:investigator "/home/investigator/.bashrc"
 
 
-
 TERMINAL_USER="${USERS[0]}"
 if [ $# -eq 0 ]; then
     exec su -l "${TERMINAL_USER}"

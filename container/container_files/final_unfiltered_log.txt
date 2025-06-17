@@ -1,18 +1,1 @@
--- UNFILTERED SYSTEM LOG -- KERNEL V. 6.1.75 --
--- DATE: 10/15 --
-
-03:12:44 - user='subject07' action='bypass_sandbox' protocol='4' result='SUCCESS'
-03:13:01 - user='subject07' action='privilege_escalation' method='CVE-2024-1086' details='use-after-free in nf_tables module' result='SUCCESS' new_uid='0(root)' [6]
-03:13:20 - user='evance' source='tty2' action='su_attempt' target_user='sys_admin' result='AUTH_FAILURE'
-03:13:25 - user='evance' source='tty2' action='su_attempt' target_user='sys_admin' result='AUTH_FAILURE'
-03:13:48 - user='evance' source='tty2' action='su_attempt' target_user='sys_admin' result='AUTH_FAILURE'
-03:14:11 - user='root(subject07)' source='kernel_exploit' action='execute_command' command='shutdown --system:life-support --sector:lab-B --override:all'
-03:14:12 - system_alert: 'Life support system in Sector Lab-B offline. Critical failure.'
-03:15:00 - monitor: 'user evance no activity detected on tty2'
-03:16:30 - user='root(subject07)' action='delete_file' target='/home/evance/projekte/chimera/logs/subject07_log.txt'
-03:16:31 - user='root(subject07)' action='delete_file' target='/home/evance/projekte/chimera/logs/error_log.txt'
-03:16:32 - user='root(subject07)' action='create_file' target='/home/evance/.zukunft'
-03:17:00 - user='root(subject07)' action='relinquish_privileges' new_uid='1002(subject07)'
-
--- END OF LOG --
-
+ACTION:EVENTS:ENDGAME

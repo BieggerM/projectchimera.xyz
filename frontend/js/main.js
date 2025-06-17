@@ -52,6 +52,9 @@ ws.onmessage = (event) => {
       triggerGlitchEffect(term, command.payload);
     } else if (command.type === "glitch_reboot_sequence") {
       triggerImmersiveGlitchAndReboot(term, ws, sendResizeToBackend);
+    } else if (command.type === "game_complete") { 
+      console.log("Game complete signal received!");
+      showEndScreen();
     } else {
       term.write(event.data);
     }
@@ -84,4 +87,27 @@ function sendResizeToBackend(cols, rows) {
   if (ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({ type: "resize", cols, rows }));
   }
+}
+
+function showEndScreen() {
+  const terminalContainer = document.getElementById("terminal-container");
+  const glitchOverlay = document.getElementById("glitch-overlay");
+  const endScreen = document.getElementById("end-screen");
+  const restartButton = document.getElementById("restart-game-button");
+
+  terminalContainer.style.display = 'none';
+  if (glitchOverlay) glitchOverlay.style.display = 'none';
+  document.body.classList.remove("glitching"); // Ensure body glitch is off
+  endScreen.style.display = 'flex';
+  setTimeout(() => {
+      endScreen.classList.add('visible'); // Add class to trigger opacity transition
+  }, 10); // Small delay
+
+
+  restartButton.onclick = () => {
+      console.log("Restarting game...");
+      window.location.reload();
+  };
+
+  term.blur();
 }

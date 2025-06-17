@@ -38,30 +38,14 @@ app.ws('/terminal', (ws, req) => {
         env: process.env 
     });
 
-    const specialEventSignal = 'ACTION:SPECIAL_EVENT:';
     const glitchRebootSignal = 'ACTION:EVENTS:GLITCHEVENT';
+    const endgameSignal = 'ACTION:EVENTS:ENDGAME';
 
     ptyProcess.onData(data => {
         const dataStr = data.toString(); // Ensure we're working with a string
         
-        if (data.startsWith(specialEventSignal)) {
-            // Log file creation event
-            console.log('[SERVER] Special event triggered by container.');
-            const logfileName = data.substring(specialEventSignal.length).trim();
-
-            const commandForFrontend = {
-                type: 'special_event',
-                payload: {
-                    logfileName: logfileName
-                }
-            };
-
-            // Sende den JSON-Befehl an das Frontend.
-            ws.send(JSON.stringify(commandForFrontend));
-        } else if (dataStr.startsWith(glitchRebootSignal)) {
-            // Immersive glitch and reboot event
+        if (dataStr.startsWith(glitchRebootSignal)) {
             console.log('[SERVER] Glitch Reboot event triggered by container.');
-            // 1. Tell frontend to start glitch sequence
             ws.send(JSON.stringify({ type: 'glitch_reboot_sequence' }));
             try {
                 console.log(`[SERVER] Executing via docker exec glitch routine`);
@@ -73,7 +57,10 @@ app.ws('/terminal', (ws, req) => {
                 executeDockerCommand(containerName, "root", copyKernelLog)
             } catch (error) {
                 console.log(error)
-            }            
+            }
+        } else if (dataStr.startsWith(endgameSignal)) {
+            console.log('[SERVER] Game complete event triggered by container.');
+            ws.send(JSON.stringify({ type: 'game_complete' }));                
         } else {
             ws.send(data);
         }

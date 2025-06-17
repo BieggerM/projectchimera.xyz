@@ -37,12 +37,12 @@ RUN adduser -D -s /bin/bash subject07
 
 
 # Story Files
-    # .zukunft
 RUN mkdir /var/archive
 COPY container_files/.zukunft /var/archive/
 COPY container_files/kernel_panic.log /var/archive/
 RUN chown sys_admin:sys_admin /var/archive/.zukunft
 COPY container_files/final_unfiltered_log.txt /var/archive/final_unfiltered_log.txt
+
 
 
 # Chpasswd  
