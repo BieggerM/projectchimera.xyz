@@ -112,11 +112,11 @@
         #end-screen .message-container,
         #end-screen .tech-foundations,
         #end-screen .personal-message,
-        #restart-game-button { /* Apply maximum width to all content blocks for consistency */
+        #restart-game-button { 
             max-width: 800px; 
-            width: 100%; /* Ensure they take full width up to max-width */
-            text-align: left; /* Left-align all text within these blocks */
-            margin-left: auto; /* Center the entire block if it's less than 100% width */
+            width: 100%; 
+            text-align: left; 
+            margin-left: auto; 
             margin-right: auto;
         }
 
@@ -127,7 +127,7 @@
             margin-bottom: 20px;
             text-shadow: 0 0 10px rgba(158, 206, 106, 0.5);
             animation: textPulse 2s infinite alternate;
-            text-align: left; /* Ensure H1 is left-aligned */
+            text-align: left; 
         }
 
         #end-screen p {
@@ -143,12 +143,12 @@
             font-size: 1.5em;
             font-weight: bold;
             margin-top: 30px;
-            text-align: left; /* Ensure this is left-aligned */
+            text-align: left; 
         }
 
         #end-screen .tech-foundations {
             font-size: 0.9em;
-            color: var(--foreground); /* Changed to white */
+            color: var(--foreground); 
             margin-top: 40px;
             line-height: 1.4;
             text-align: left;
@@ -156,7 +156,7 @@
 
         #end-screen .personal-message {
             font-size: 1.0em;
-            color: var(--foreground); /* Changed to white */
+            color: var(--foreground); 
             margin-top: 30px;
             max-width: 700px;
             line-height: 1.5;
@@ -174,12 +174,10 @@
             margin-top: 40px;
             transition: background-color 0.3s ease, transform 0.2s ease;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-            /* Button alignment */
-            display: block; /* Make button a block element to control margin */
-            margin-left: auto; /* Center button if its container is wider than itself */
-            margin-right: auto; /* Or just margin-left: 0; if you want it strictly left */
-            /* For left-aligned button in a left-aligned container: */
-            align-self: flex-start; /* Align within flex column */
+            display: block; 
+            margin-left: auto; 
+            margin-right: auto; 
+            align-self: flex-start; 
         }
 
         #restart-game-button:hover {

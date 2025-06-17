@@ -3,7 +3,7 @@
 const express = require('express');
 const expressWs = require('express-ws');
 const pty = require('node-pty');
-const { exec } = require('child_process'); // Import exec
+const { exec } = require('child_process');
 const WebSocket = require('ws');
 
 const app = express();
@@ -43,7 +43,7 @@ app.ws('/terminal', (ws, req) => {
     const endgameSignal = 'ACTION:EVENTS:ENDGAME';
 
     ptyProcess.onData(data => {
-        const dataStr = data.toString(); // Ensure we're working with a string
+        const dataStr = data.toString();
         if (dataStr.includes(glitchRebootSignal)) {
             handleGlitchEvent(ws, containerName);
         } else if (dataStr.includes(endgameSignal)) {
@@ -62,7 +62,6 @@ app.ws('/terminal', (ws, req) => {
             } else if (command.type === 'ping') { 
                 if (ws.readyState === WebSocket.OPEN) {
                     ws.send(JSON.stringify({ type: 'pong' }));
-                    //console.log("Received ping, sent pong."); // For debugging
                 }
             } else {
                 ptyProcess.write(message);
@@ -100,23 +99,21 @@ function handleGlitchEvent(ws, containerName) {
 }
 
 /**
- * Führt einen Befehl innerhalb eines Docker-Containers als spezifischen Benutzer aus.
- * @param {string} containerName Der Name oder die ID des Docker-Containers.
- * @param {string} username Der Benutzername, unter dem der Befehl ausgeführt werden soll (z.B. 'root' oder 'investigator').
- * @param {string} command Der auszuführende Befehl (z.B. 'ls -l /var/log/').
- * @returns {Promise<{stdout: string, stderr: string}>} Eine Promise, die mit stdout und stderr aufgelöst wird, oder bei Fehler abgelehnt wird.
+ * 
+ * @param {string} containerName 
+ * @param {string} username 
+ * @param {string} command 
+ * @returns {Promise<{stdout: string, stderr: string}>} 
  */
 function executeDockerCommand(containerName, username, command) {
     return new Promise((resolve, reject) => {
-        // Optionale Ergänzung: Überprüfen, ob Username gültig ist (einfache Prüfung)
         if (!username || typeof username !== 'string') {
             console.error("[SERVER] Invalid username provided for docker exec.");
             return reject(new Error("Invalid username for docker exec."));
         }
 
-        // Konstruiere den vollen Docker-Befehl mit dem -u Flag
         const fullCommand = `docker exec -u ${username} ${containerName} ${command}`;
-        console.log(`[SERVER] Executing via docker exec: ${fullCommand}`); // Logging für Sichtbarkeit
+        console.log(`[SERVER] Executing via docker exec: ${fullCommand}`); 
 
         exec(fullCommand, (error, stdout, stderr) => {
             if (error) {
@@ -127,11 +124,9 @@ function executeDockerCommand(containerName, username, command) {
                 reject({ error, stdout, stderr });
             } else {
                 console.log(`[SERVER] Successfully executed via docker exec. stdout: ${stdout.trim()}`);
-                // Gib stderr auch bei Erfolg aus, falls es Warnungen enthält
                 if (stderr) {
                     console.warn(`[SERVER] Stderr from docker exec (warnings): ${stderr.trim()}`);
                 }
-                // Löse die Promise mit stdout und stderr auf
                 resolve({ stdout, stderr });
             }
         });

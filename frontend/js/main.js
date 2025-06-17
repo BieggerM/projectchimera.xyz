@@ -1,3 +1,5 @@
+// main.js
+
 const term = new Terminal({
   fontFamily: "'Fira Mono', monospace",
   fontSize: 16,
@@ -49,7 +51,6 @@ ws.onopen = () => {
   }, 5000); // Send a ping every 5 seconds
 };
 
-// --- ERSETZTER NACHRICHTEN-HANDLER ---
 ws.onmessage = (event) => {
   try {
     const command = JSON.parse(event.data);
@@ -104,11 +105,11 @@ function showEndScreen() {
 
   terminalContainer.style.display = 'none';
   if (glitchOverlay) glitchOverlay.style.display = 'none';
-  document.body.classList.remove("glitching"); // Ensure body glitch is off
+  document.body.classList.remove("glitching"); 
   endScreen.style.display = 'flex';
   setTimeout(() => {
-      endScreen.classList.add('visible'); // Add class to trigger opacity transition
-  }, 10); // Small delay
+      endScreen.classList.add('visible');
+  }, 10);
 
 
   restartButton.onclick = () => {

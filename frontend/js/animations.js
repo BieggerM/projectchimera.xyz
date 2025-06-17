@@ -9,10 +9,8 @@ function triggerGlitchEffect(term, payload) {
   let counter = 0;
   const interval = setInterval(() => {
     if (counter >= 15) {
-      // Anzahl der Glitch-Zeilen
       clearInterval(interval);
-      term.clear(); // Terminal leeren
-      // \x1b[31m setzt die Farbe auf Rot, \x1b[0m setzt sie zurück
+      term.clear(); 
       term.write(`\r\n\x1b[31mSYSTEM INTEGRITY COMPROMISED.\x1b[0m\r\n`);
       term.write(`A new log file was created: ${payload.logfileName}\r\n\r\n`);
       return;
@@ -22,18 +20,17 @@ function triggerGlitchEffect(term, payload) {
     for (let i = 0; i < term.cols; i++) {
       line += glitchChars[Math.floor(Math.random() * glitchChars.length)];
     }
-    term.write(`\r${line}`); // \r springt an den Zeilenanfang für den Überschreib-Effekt
+    term.write(`\r${line}`); 
     counter++;
-  }, 50); // Geschwindigkeit des Glitches (in ms)
+  }, 50); 
 }
 
 async function triggerImmersiveGlitchAndReboot(term, ws, sendResizeToBackendCallback) {
-  const glitchOverlay = document.getElementById("glitch-overlay"); // Optional overlay
-  const glitchDuration = 3000; // Total duration of the visual glitch in ms
-  const preGlitchMessageDelay = 200; // Delay for pre-glitch messages
+  const glitchOverlay = document.getElementById("glitch-overlay"); 
+  const glitchDuration = 3000; 
+  const preGlitchMessageDelay = 200;
   let terminalGlitchInterval;
 
-  // 0. Pre-Glitch System Failure Messages
   const failureMessages = [
     "\r\n\x1b[31mSYSTEM ALERT: KERNEL INTEGRITY COMPROMISED...\x1b[0m",
     "Segment_Fault @ 0xDEADBEEF",
@@ -46,9 +43,9 @@ async function triggerImmersiveGlitchAndReboot(term, ws, sendResizeToBackendCall
     term.write(msg + "\r\n");
     await new Promise((resolve) =>
       setTimeout(resolve, preGlitchMessageDelay + Math.random() * 150)
-    ); // Add some randomness
+    ); 
   }
-  await new Promise((resolve) => setTimeout(resolve, 500)); // Pause before full glitch
+  await new Promise((resolve) => setTimeout(resolve, 500)); 
 
   document.body.classList.add("glitching");
   if (glitchOverlay) glitchOverlay.style.display = "block";
@@ -61,8 +58,7 @@ async function triggerImmersiveGlitchAndReboot(term, ws, sendResizeToBackendCall
     }
     term.write(`\r${line}`);
     term.write("\r\n");
-  }, 30); // Faster terminal glitch
-
+  }, 30); 
   await new Promise((resolve) => setTimeout(resolve, glitchDuration));
 
   clearInterval(terminalGlitchInterval);
