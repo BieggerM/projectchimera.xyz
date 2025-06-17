@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-chmod 701 /home/ 
+chmod 755 /home/ 
 
 USERS=("investigator" "evans" "subject07" "sys_admin")
 
