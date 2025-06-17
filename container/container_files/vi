@@ -10,6 +10,10 @@ if [ -n "$FILE_TO_OPEN" ]; then
             echo "ACTION:EVENTS:GLITCHEVENT"
             exit 0
         fi
+        if grep -q "ACTION:EVENTS:ENDGAME" "$FILE_TO_OPEN"; then
+            echo "ACTION:EVENTS:ENDGAME"
+            exit 0
+        fi
     fi
 fi
 

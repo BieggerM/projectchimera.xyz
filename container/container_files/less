@@ -8,7 +8,11 @@ if [ ! -f "$FILE_TO_OPEN" ]; then
 fi
 
 if grep -q "ACTION:EVENTS:GLITCHEVENT" "$FILE_TO_OPEN"; then
-    echo "ACTION:EVENTS:GLITCHEVENT_FROM_FILE"
+    echo "ACTION:EVENTS:GLITCHEVENT"
+    exit 0
+fi
+if grep -q "ACTION:EVENTS:ENDGAME" "$FILE_TO_OPEN"; then
+    echo "ACTION:EVENTS:ENDGAME"
     exit 0
 fi
 
