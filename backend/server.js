@@ -38,47 +38,30 @@ app.ws('/terminal', (ws, req) => {
         env: process.env 
     });
 
-    const specialEventSignal = 'ACTION:SPECIAL_EVENT:';
     const glitchRebootSignal = 'ACTION:EVENTS:GLITCHEVENT';
+    const endgameSignal = 'ACTION:EVENTS:ENDGAME';
 
     ptyProcess.onData(data => {
         const dataStr = data.toString(); // Ensure we're working with a string
         
-        if (data.startsWith(specialEventSignal)) {
-            // Log file creation event
-            console.log('[SERVER] Special event triggered by container.');
-            const logfileName = data.substring(specialEventSignal.length).trim();
-
-            const commandForFrontend = {
-                type: 'special_event',
-                payload: {
-                    logfileName: logfileName
-                }
-            };
-
-            // Sende den JSON-Befehl an das Frontend.
-            ws.send(JSON.stringify(commandForFrontend));
-        } else if (dataStr.startsWith(glitchRebootSignal)) {
-            // Immersive glitch and reboot event
+        if (dataStr.startsWith(glitchRebootSignal)) {
             console.log('[SERVER] Glitch Reboot event triggered by container.');
-            // 1. Tell frontend to start glitch sequence
             ws.send(JSON.stringify({ type: 'glitch_reboot_sequence' }));
-
-            // 2. Use docker exec to delete the file as root
-            const deleteCommandViaExec = `docker exec ${containerName} rm -f /home/evans/projects/chimera/logs/subject07.log`;
-            console.log(`[SERVER] Executing via docker exec: ${deleteCommandViaExec}`);
-            exec(deleteCommandViaExec, (error, stdout, stderr) => {
-                if (error) {
-                    console.error(`[SERVER] Error executing docker exec for rm: ${error.message}`);
-                    return;
-                }
-                if (stderr) {
-                    console.warn(`[SERVER] Stderr from docker exec for rm: ${stderr}`);
-                }
-                console.log(`[SERVER] Successfully executed rm via docker exec. stdout: ${stdout}`);
-            });
+            try {
+                console.log(`[SERVER] Executing via docker exec glitch routine`);
+                const deleteSubject07log = `rm -f /home/evans/projects/chimera/logs/subject07.log`;
+                executeDockerCommand(containerName, "root", deleteSubject07log)
+                const copyZukunftFile = `cp /var/archive/.zukunft /home/evans/`;
+                executeDockerCommand(containerName, "evans", copyZukunftFile);
+                const copyKernelLog = `cp /var/archive/kernel_panic.log /home/evans/`
+                executeDockerCommand(containerName, "root", copyKernelLog)
+            } catch (error) {
+                console.log(error)
+            }
+        } else if (dataStr.startsWith(endgameSignal)) {
+            console.log('[SERVER] Game complete event triggered by container.');
+            ws.send(JSON.stringify({ type: 'game_complete' }));                
         } else {
-            // Normale Daten, einfach weiterleiten.
             ws.send(data);
         }
     });
@@ -106,4 +89,44 @@ app.listen(port, () => {
     console.log(`Web Terminal server listening at http://192.168.0.99:${port}`);
     console.log(`Build the terminal image first with: docker build -t ${dockerImageName} ../`);
 });
+
+/**
+ * Führt einen Befehl innerhalb eines Docker-Containers als spezifischen Benutzer aus.
+ * @param {string} containerName Der Name oder die ID des Docker-Containers.
+ * @param {string} username Der Benutzername, unter dem der Befehl ausgeführt werden soll (z.B. 'root' oder 'investigator').
+ * @param {string} command Der auszuführende Befehl (z.B. 'ls -l /var/log/').
+ * @returns {Promise<{stdout: string, stderr: string}>} Eine Promise, die mit stdout und stderr aufgelöst wird, oder bei Fehler abgelehnt wird.
+ */
+function executeDockerCommand(containerName, username, command) {
+    return new Promise((resolve, reject) => {
+        // Optionale Ergänzung: Überprüfen, ob Username gültig ist (einfache Prüfung)
+        if (!username || typeof username !== 'string') {
+            console.error("[SERVER] Invalid username provided for docker exec.");
+            return reject(new Error("Invalid username for docker exec."));
+        }
+
+        // Konstruiere den vollen Docker-Befehl mit dem -u Flag
+        const fullCommand = `docker exec -u ${username} ${containerName} ${command}`;
+        console.log(`[SERVER] Executing via docker exec: ${fullCommand}`); // Logging für Sichtbarkeit
+
+        exec(fullCommand, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`[SERVER] Error executing docker exec command '${command}' as user '${username}': ${error.message}`);
+                if (stderr) {
+                    console.warn(`[SERVER] Stderr from docker exec: ${stderr}`);
+                }
+                reject({ error, stdout, stderr });
+            } else {
+                console.log(`[SERVER] Successfully executed via docker exec. stdout: ${stdout.trim()}`);
+                // Gib stderr auch bei Erfolg aus, falls es Warnungen enthält
+                if (stderr) {
+                    console.warn(`[SERVER] Stderr from docker exec (warnings): ${stderr.trim()}`);
+                }
+                // Löse die Promise mit stdout und stderr auf
+                resolve({ stdout, stderr });
+            }
+        });
+    });
+}
+
 

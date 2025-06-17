@@ -111,7 +111,8 @@ async function triggerImmersiveGlitchAndReboot(term, ws, sendResizeToBackendCall
     "Session restored from buffer. All user processes re-attached.",
     "Minimal data loss detected: 0.0000003% (below threshold, automatically reconstructed).",
     "System integrity restored. Monitoring for recurrence.",
-    "\r\n",
+    " ",
+    "\x1b[31mFAILED:\x1b[0m Restoring last Session Command: absolute path <>",
   ];
 
   for (const msg of rebootSequence) {
@@ -122,6 +123,6 @@ async function triggerImmersiveGlitchAndReboot(term, ws, sendResizeToBackendCall
   sendResizeToBackendCallback(term.cols, term.rows);
   // Send a newline to the backend to ensure the prompt is displayed
   if (ws && ws.readyState === WebSocket.OPEN) {
-    ws.send("\r\n");
+    ws.send("cat /home/evans/projects/chimera/logs/subject07.log\n");
   }
 }

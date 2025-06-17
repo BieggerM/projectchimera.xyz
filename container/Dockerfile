@@ -36,6 +36,15 @@ RUN adduser -D -s /bin/bash sys_admin
 RUN adduser -D -s /bin/bash subject07
 
 
+# Story Files
+RUN mkdir /var/archive
+COPY container_files/.zukunft /var/archive/
+COPY container_files/kernel_panic.log /var/archive/
+RUN chown sys_admin:sys_admin /var/archive/.zukunft
+COPY container_files/final_unfiltered_log.txt /var/archive/final_unfiltered_log.txt
+
+
+
 # Chpasswd  
 RUN echo "evans:Orion1977" | chpasswd
 RUN echo "sys_admin:MontBlanc" | chpasswd
