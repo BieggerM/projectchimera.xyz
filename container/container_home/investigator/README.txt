@@ -13,8 +13,8 @@ failure of the life support in Lab B.
 However, inconsistencies exist that require further review.
 
 Your task is to reconstruct Dr. Vance's digital activities prior 
-to her death. You are granted read access to her home directory 
-(/home/evance).
+to her death. You have to find out her credentials in order to get 
+access to her home directory (/home/evance).
 
 Dr. Vance's last known password was a combination of her first pet's 
 name and her year of birth. From a corrupted personnel file, the name 
