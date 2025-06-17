@@ -3,7 +3,7 @@ set -e
 
 chmod 755 /home/ 
 
-USERS=("investigator" "evans" "subject07" "sys_admin")
+USERS=("investigator" "evance" "subject07" "sys_admin")
 
 for USER in "${USERS[@]}"; do
     if ! id -u "$USER" &>/dev/null; then

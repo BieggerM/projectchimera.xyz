@@ -49,11 +49,11 @@ app.ws('/terminal', (ws, req) => {
             ws.send(JSON.stringify({ type: 'glitch_reboot_sequence' }));
             try {
                 console.log(`[SERVER] Executing via docker exec glitch routine`);
-                const deleteSubject07log = `rm -f /home/evans/projects/chimera/logs/subject07.log`;
+                const deleteSubject07log = `rm -f /home/evance/projects/chimera/logs/subject07.log`;
                 executeDockerCommand(containerName, "root", deleteSubject07log)
-                const copyZukunftFile = `cp /var/archive/.zukunft /home/evans/`;
-                executeDockerCommand(containerName, "evans", copyZukunftFile);
-                const copyKernelLog = `cp /var/archive/kernel_panic.log /home/evans/`
+                const copyZukunftFile = `cp /var/archive/.zukunft /home/evance/`;
+                executeDockerCommand(containerName, "evance", copyZukunftFile);
+                const copyKernelLog = `cp /var/archive/kernel_panic.log /home/evance/`
                 executeDockerCommand(containerName, "root", copyKernelLog)
             } catch (error) {
                 console.log(error)

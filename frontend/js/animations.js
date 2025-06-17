@@ -123,6 +123,6 @@ async function triggerImmersiveGlitchAndReboot(term, ws, sendResizeToBackendCall
   sendResizeToBackendCallback(term.cols, term.rows);
   // Send a newline to the backend to ensure the prompt is displayed
   if (ws && ws.readyState === WebSocket.OPEN) {
-    ws.send("cat /home/evans/projects/chimera/logs/subject07.log\n");
+    ws.send("cat /home/evance/projects/chimera/logs/subject07.log\n");
   }
 }

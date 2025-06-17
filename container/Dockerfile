@@ -25,13 +25,13 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Copy User Home dirs to overwrite tmpfs later
 COPY ./container_home/investigator /app-data/investigator/
-COPY ./container_home/evans /app-data/evans/
+COPY ./container_home/evance /app-data/evance/
 COPY ./container_home/sys_admin /app-data/sys_admin/
 COPY ./container_home/subject07 /app-data/subject07/
 
 # Users
 RUN adduser -D -s /bin/bash investigator
-RUN adduser -D -s /bin/bash evans
+RUN adduser -D -s /bin/bash evance
 RUN adduser -D -s /bin/bash sys_admin
 RUN adduser -D -s /bin/bash subject07
 
@@ -46,7 +46,7 @@ COPY container_files/final_unfiltered_log.txt /var/archive/final_unfiltered_log.
 
 
 # Chpasswd  
-RUN echo "evans:Orion1977" | chpasswd
+RUN echo "evance:Orion1977" | chpasswd
 RUN echo "sys_admin:MontBlanc" | chpasswd
 RUN echo "subject07:null_geburt" | chpasswd
 RUN passwd -l root
