@@ -44,21 +44,9 @@ app.ws('/terminal', (ws, req) => {
     ptyProcess.onData(data => {
         const dataStr = data.toString(); // Ensure we're working with a string
         
-        if (dataStr.startsWith(glitchRebootSignal)) {
-            console.log('[SERVER] Glitch Reboot event triggered by container.');
-            ws.send(JSON.stringify({ type: 'glitch_reboot_sequence' }));
-            try {
-                console.log(`[SERVER] Executing via docker exec glitch routine`);
-                const deleteSubject07log = `rm -f /home/evance/projects/chimera/logs/subject07.log`;
-                executeDockerCommand(containerName, "root", deleteSubject07log)
-                const copyZukunftFile = `cp /var/archive/.zukunft /home/evance/`;
-                executeDockerCommand(containerName, "evance", copyZukunftFile);
-                const copyKernelLog = `cp /var/archive/kernel_panic.log /home/evance/`
-                executeDockerCommand(containerName, "root", copyKernelLog)
-            } catch (error) {
-                console.log(error)
-            }
-        } else if (dataStr.startsWith(endgameSignal)) {
+        if (dataStr.includes(glitchRebootSignal)) {
+            handleGlitchEvent(ws, containerName);
+        } else if (dataStr.includes(endgameSignal)) {
             console.log('[SERVER] Game complete event triggered by container.');
             ws.send(JSON.stringify({ type: 'game_complete' }));                
         } else {
@@ -89,6 +77,22 @@ app.listen(port, () => {
     console.log(`Web Terminal server listening at http://192.168.0.99:${port}`);
     console.log(`Build the terminal image first with: docker build -t ${dockerImageName} ../`);
 });
+
+function handleGlitchEvent(ws, containerName) {
+    console.log('[SERVER] Glitch Reboot event triggered by container.');
+    ws.send(JSON.stringify({ type: 'glitch_reboot_sequence' }));
+    try {
+        console.log(`[SERVER] Executing via docker exec glitch routine`);
+        const deleteSubject07log = `rm -f /home/evance/projects/chimera/logs/subject07.log`;
+        executeDockerCommand(containerName, "root", deleteSubject07log);
+        const copyZukunftFile = `cp /var/archive/.zukunft /home/evance/`;
+        executeDockerCommand(containerName, "evance", copyZukunftFile);
+        const copyKernelLog = `cp /var/archive/kernel_panic.log /home/evance/`;
+        executeDockerCommand(containerName, "root", copyKernelLog);
+    } catch (error) {
+        console.log(error);
+    }
+}
 
 /**
  * Führt einen Befehl innerhalb eines Docker-Containers als spezifischen Benutzer aus.
