@@ -37,7 +37,22 @@ term.open(termContainer);
 fitAddon.fit();
 window.addEventListener("resize", () => fitAddon.fit());
 
-const websocketUrl = `ws://192.168.0.99:3000/terminal`;
+function resolveWebSocketUrl() {
+  const host = window.location.hostname;
+  if (!host) {
+    return "ws://localhost:3000/terminal";
+  }
+  const isLocal =
+    host === "localhost" ||
+    host === "127.0.0.1" ||
+    host.startsWith("192.168.");
+  if (isLocal) {
+    return `ws://${host}:3000/terminal`;
+  }
+  return `wss://${host}/terminal`;
+}
+
+const websocketUrl = resolveWebSocketUrl();
 const ws = new WebSocket(websocketUrl);
 
 ws.onopen = () => {
