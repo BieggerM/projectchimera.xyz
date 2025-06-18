@@ -12,7 +12,7 @@ BACKEND_IMAGE_NAME="web-terminal-backend-app"
 BACKEND_CONTAINER_NAME="web-terminal-server-instance"
 
 TERMINAL_CONTAINER_DIR="$PROJECT_ROOT/container"
-TERMINAL_IMAGE_NAME="terminal-container"
+TERMINAL_IMAGE_NAME="ghcr.io/bieggerm/projectchimera.xyz/terminal-container:latest"
 
 echo "--- Starting Project Chimera Full Deployment ---"
 echo "Project Root: $PROJECT_ROOT"
@@ -67,16 +67,13 @@ echo "Backend container '$BACKEND_CONTAINER_NAME' started successfully on port 3
 echo "--- Backend Container Deployment Complete ---"
 echo "------------------------------------------------"
 
-echo "--- Building Terminal Container Image ---"
+echo "--- Pulling Terminal Container Image ---"
 
-echo "Navigating to terminal container directory: $TERMINAL_CONTAINER_DIR"
-cd "$TERMINAL_CONTAINER_DIR"
+echo "Pulling Docker image: $TERMINAL_IMAGE_NAME"
+docker pull "$TERMINAL_IMAGE_NAME"
+echo "Docker image '$TERMINAL_IMAGE_NAME' pulled successfully."
 
-echo "Building Docker image: $TERMINAL_IMAGE_NAME"
-docker build -t "$TERMINAL_IMAGE_NAME" .
-echo "Docker image '$TERMINAL_IMAGE_NAME' built successfully."
-
-echo "--- Terminal Container Image Build Complete ---"
+echo "--- Terminal Container Image Pull Complete ---"
 echo "------------------------------------------------"
 
 echo "--- Restarting Nginx service ---"
