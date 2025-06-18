@@ -37,7 +37,9 @@ term.open(termContainer);
 fitAddon.fit();
 window.addEventListener("resize", () => fitAddon.fit());
 
-const websocketUrl = `ws://192.168.0.99:3000/terminal`;
+// The WebSocket URL is provided via `window.WEBSOCKET_URL` from config.js.
+// Fallback to the development server if the variable is missing.
+const websocketUrl = window.WEBSOCKET_URL || "ws://192.168.0.99/terminal";
 const ws = new WebSocket(websocketUrl);
 
 ws.onopen = () => {

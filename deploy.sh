@@ -29,6 +29,8 @@ sudo mkdir -p "$FRONTEND_DEST_DIR"
 echo "Copying files from $FRONTEND_SOURCE_DIR to $FRONTEND_DEST_DIR..."
 sudo rsync -av --delete "$FRONTEND_SOURCE_DIR/" "$FRONTEND_DEST_DIR/"
 echo "Frontend files copied."
+echo "Writing WebSocket configuration..."
+sudo bash -c "echo \"window.WEBSOCKET_URL = 'wss://$DOMAIN_NAME/terminal';\" > \"$FRONTEND_DEST_DIR/js/config.js\""
 
 echo "Setting ownership to $NGINX_USER:$NGINX_USER for $FRONTEND_DEST_DIR..."
 sudo chown -R "$NGINX_USER":"$NGINX_USER" "$FRONTEND_DEST_DIR"

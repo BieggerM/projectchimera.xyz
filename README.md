@@ -76,12 +76,13 @@ This guide assumes a fresh **Ubuntu 24.04 LTS VM** with SSH access and your proj
     # Crucial: Log out/in, then run ./deploy_prep.sh again to complete.
     ```
 
-2.  **Perform Full Project Deployment:** Copies frontend, pulls the latest container images, and starts the backend.
+2.  **Perform Full Project Deployment:** Copies frontend, writes the production WebSocket URL, pulls the latest container images, and starts the backend.
 
     ```bash
     chmod +x deploy.sh
-    # Set your domain name as an environment variable before running
-    export DOMAIN_NAME="projectchimera.xyz" 
+    # Set your domain name as an environment variable before running.
+    # deploy.sh uses this to generate frontend/js/config.js
+    export DOMAIN_NAME="projectchimera.xyz"
     sudo ./deploy.sh
     ```
 
@@ -105,6 +106,7 @@ Navigate to `https://projectchimera.xyz/` in your web browser. Interact with the
 * **Terminal Environment:** Adjust `container/Dockerfile` and `container/entrypoint.sh`.
 * **MOTD:** Edit `container/your_motd_file.txt`.
 * **UI/Animations:** Modify `frontend/js/animations.js`, `frontend/main.js`, `frontend/index.html` CSS.
+* **WebSocket URL:** Update `frontend/js/config.js` for local vs production environments (automatically overwritten by `deploy.sh`).
 
 ---
 
