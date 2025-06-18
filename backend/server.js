@@ -10,7 +10,19 @@ const app = express();
 expressWs(app);
 
 const port = 3000;
-const dockerImageName = 'terminal-container';
+// Use the GHCR image by default, but allow override via environment variable
+const dockerImageName = process.env.TERMINAL_IMAGE_NAME ||
+    'ghcr.io/bieggerm/projectchimera.xyz/terminal-container:latest';
+
+// Pull the latest image on startup to ensure we have the most recent version
+exec(`docker pull ${dockerImageName}`, (err, stdout, stderr) => {
+    if (err) {
+        console.error(`[SERVER] Failed to pull Docker image ${dockerImageName}: ${err.message}`);
+        if (stderr) console.error(stderr);
+    } else {
+        console.log(`[SERVER] Pulled Docker image ${dockerImageName}`);
+    }
+});
 
 app.ws('/terminal', (ws, req) => {
     console.log('WebSocket connection established.');
@@ -79,7 +91,7 @@ app.ws('/terminal', (ws, req) => {
 
 app.listen(port, () => {
     console.log(`Web Terminal server listening at http://192.168.0.99:${port}`);
-    console.log(`Build the terminal image first with: docker build -t ${dockerImageName} ../`);
+    console.log(`Using terminal image: ${dockerImageName}`);
 });
 
 function handleGlitchEvent(ws, containerName) {

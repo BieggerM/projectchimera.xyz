@@ -76,7 +76,7 @@ This guide assumes a fresh **Ubuntu 24.04 LTS VM** with SSH access and your proj
     # Crucial: Log out/in, then run ./deploy_prep.sh again to complete.
     ```
 
-2.  **Perform Full Project Deployment:** Copies frontend, builds Docker images, starts backend.
+2.  **Perform Full Project Deployment:** Copies frontend, pulls the latest container images, and starts the backend.
 
     ```bash
     chmod +x deploy.sh
