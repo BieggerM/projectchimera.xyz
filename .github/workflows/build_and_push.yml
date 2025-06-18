@@ -32,5 +32,5 @@ jobs:
           context: .
           file: container/Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository }}/terminal-container:latest
+          tags: ghcr.io/bieggerm/projectchimera.xyzterminal-container:latest
 
