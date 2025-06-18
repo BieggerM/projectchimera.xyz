@@ -29,8 +29,8 @@ jobs:
       - name: Build and push image
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: container/
           file: container/Dockerfile
           push: true
-          tags: ghcr.io/bieggerm/projectchimera.xyzterminal-container:latest
+          tags: ghcr.io/bieggerm/projectchimera.xyz/terminal-container:latest
 
