@@ -28,6 +28,8 @@ COPY ./container_home/investigator /app-data/investigator/
 COPY ./container_home/evance /app-data/evance/
 COPY ./container_home/sys_admin /app-data/sys_admin/
 COPY ./container_home/subject07 /app-data/subject07/
+RUN chown -R root:root /app-data && \
+    chmod -R go-rwx /app-data
 
 # Users
 RUN adduser -D -s /bin/bash investigator
@@ -40,8 +42,9 @@ RUN adduser -D -s /bin/bash subject07
 RUN mkdir /var/archive
 COPY container_files/.zukunft /var/archive/
 COPY container_files/kernel_panic.log /var/archive/
-RUN chown sys_admin:sys_admin /var/archive/.zukunft
 COPY container_files/final_unfiltered_log.txt /var/archive/final_unfiltered_log.txt
+RUN chown -R sys_admin:sys_admin /var/archive && \
+    chmod -R go-rwx /var/archive
 
 
 
