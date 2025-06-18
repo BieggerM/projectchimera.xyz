@@ -8,8 +8,7 @@ FRONTEND_DEST_DIR="/var/www/project-chimera-frontend"
 NGINX_USER="www-data"
 
 BACKEND_DIR="$PROJECT_ROOT/backend"
-BACKEND_IMAGE_NAME="web-terminal-backend-app"
-BACKEND_CONTAINER_NAME="web-terminal-server-instance"
+PM2_APP_NAME="web-terminal-backend"
 
 TERMINAL_CONTAINER_DIR="$PROJECT_ROOT/container"
 TERMINAL_IMAGE_NAME="ghcr.io/bieggerm/projectchimera.xyz/terminal-container:latest"
@@ -42,29 +41,21 @@ echo "Frontend permissions set."
 echo "--- Frontend Deployment Complete ---"
 echo "------------------------------------------------"
 
-echo "--- Building and Running Backend Container ---"
+echo "--- Building and Starting Backend Application ---"
 
 echo "Navigating to backend directory: $BACKEND_DIR"
 cd "$BACKEND_DIR"
 
-echo "Building Docker image: $BACKEND_IMAGE_NAME"
-docker build -t "$BACKEND_IMAGE_NAME" -f Dockerfile.backend .
-echo "Docker image '$BACKEND_IMAGE_NAME' built successfully."
+echo "Installing Node.js dependencies..."
+npm install --production
+echo "Dependencies installed."
 
-echo "Stopping and removing any old backend container instance: $BACKEND_CONTAINER_NAME"
-docker stop "$BACKEND_CONTAINER_NAME" 2>/dev/null || true
-docker rm "$BACKEND_CONTAINER_NAME" 2>/dev/null || true
-echo "Old backend container cleaned."
+echo "Starting backend with PM2..."
+pm2 restart "$PM2_APP_NAME" --update-env 2>/dev/null || \
+  TERMINAL_IMAGE_NAME="$TERMINAL_IMAGE_NAME" pm2 start server.js --name "$PM2_APP_NAME"
+echo "Backend running under PM2 process '$PM2_APP_NAME'."
 
-echo "Running new backend container: $BACKEND_CONTAINER_NAME"
-docker run -d \
-  --name "$BACKEND_CONTAINER_NAME" \
-  -p 127.0.0.1:3000:3000 \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  "$BACKEND_IMAGE_NAME"
-echo "Backend container '$BACKEND_CONTAINER_NAME' started successfully on port 3000."
-
-echo "--- Backend Container Deployment Complete ---"
+echo "--- Backend Deployment Complete ---"
 echo "------------------------------------------------"
 
 echo "--- Pulling Terminal Container Image ---"
