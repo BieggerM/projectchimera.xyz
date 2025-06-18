@@ -94,17 +94,21 @@ app.listen(port, () => {
     console.log(`Using terminal image: ${dockerImageName}`);
 });
 
-function handleGlitchEvent(ws, containerName) {
+async function handleGlitchEvent(ws, containerName) {
     console.log('[SERVER] Glitch Reboot event triggered by container.');
     ws.send(JSON.stringify({ type: 'glitch_reboot_sequence' }));
     try {
         console.log(`[SERVER] Executing via docker exec glitch routine`);
         const deleteSubject07log = `rm -f /home/evance/projects/chimera/logs/subject07.log`;
-        executeDockerCommand(containerName, "root", deleteSubject07log);
+        await executeDockerCommand(containerName, "root", deleteSubject07log);
         const copyZukunftFile = `cp /var/archive/.zukunft /home/evance/`;
-        executeDockerCommand(containerName, "evance", copyZukunftFile);
+        await executeDockerCommand(containerName, "root", copyZukunftFile);
         const copyKernelLog = `cp /var/archive/kernel_panic.log /home/evance/`;
-        executeDockerCommand(containerName, "root", copyKernelLog);
+        await executeDockerCommand(containerName, "root", copyKernelLog);
+        const chownZukunftFile = `chown evance:evance /home/evance/.zukunft`;
+        await executeDockerCommand(containerName, "root", chownZukunftFile);
+        const chownKernelLog = `chown evance:evance /home/evance/kernel_panic.log`;
+        await executeDockerCommand(containerName, "root", chownKernelLog);
     } catch (error) {
         console.log(error);
     }
