@@ -195,7 +195,6 @@ app.ws('/terminal', async (ws, req) => {
             });
         }
 
-        logSessionEvent({ type: 'input_chunk', payload: inputData });
         ptyProcess.write(message);
     });
 
