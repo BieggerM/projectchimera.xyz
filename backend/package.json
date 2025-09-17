@@ -2,6 +2,7 @@
   "dependencies": {
     "express": "^5.1.0",
     "express-ws": "^5.0.2",
-    "node-pty": "^1.0.0"
+    "node-pty": "^1.0.0",
+    "mongodb": "^6.8.0"
   }
 }

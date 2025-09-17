@@ -26,7 +26,7 @@ The Game is not very good. But the time I spent building it was.
 * **Interactive Narrative:** In-game actions (e.g., file interactions) trigger frontend animations and backend events.
 * **Customization:** Personalized MOTD, prompt, and custom `less`/`vi` wrappers for game integration.
 * **Secure Environment:** Strict Docker container limits (`--read-only`, `--tmpfs /home`, `--network=none`), hardened permissions (`700`, `740`, `640`), and isolated user accounts.
-* **Robust Logging (Optional):** Designed with an option for logging user inputs into an SQLite database (currently disabled).
+* **Session Logging (Optional):** Stream per-session command and output events into MongoDB Atlas when credentials are provided.
 * **Game Complete Screen:** An animated end screen signals successful completion.
 
 ---
@@ -39,6 +39,7 @@ The Game is not very good. But the time I spent building it was.
 
 * **Web Server/Proxy:** **Nginx** (SSL/TLS via Certbot).
 * **Process Management:** **PM2**.
+* **Database (optional):** **MongoDB Atlas** for session event logging.
 * **Operating System:** Ubuntu 24.04 LTS VM.
 
 ---
@@ -83,7 +84,11 @@ This guide assumes a fresh **Ubuntu 24.04 LTS VM** with SSH access and your proj
     # Set your domain name as an environment variable before running.
     # deploy.sh uses this to generate frontend/js/config.js
     export DOMAIN_NAME="projectchimera.xyz"
-    sudo ./deploy.sh
+    # Optional: provide MongoDB Atlas credentials to enable session logging
+    export MONGO_URI="mongodb+srv://<user>:<password>@cluster.mongodb.net/?retryWrites=true&w=majority"
+    export MONGO_DB_NAME="projectchimera"      # optional override
+    export MONGO_COLLECTION="sessions"         # optional override
+    sudo -E ./deploy.sh                         # -E preserves the environment for sudo
     ```
 
 ### 🧪 Verification
@@ -107,6 +112,19 @@ Navigate to `https://projectchimera.xyz/` in your web browser. Interact with the
 * **MOTD:** Edit `container/your_motd_file.txt`.
 * **UI/Animations:** Modify `frontend/js/animations.js`, `frontend/main.js`, `frontend/index.html` CSS.
 * **WebSocket URL:** Update `frontend/js/config.js` for local vs production environments (automatically overwritten by `deploy.sh`).
+* **Session Logging:** Configure `MONGO_URI`, `MONGO_DB_NAME`, and `MONGO_COLLECTION` to control MongoDB Atlas logging behaviour.
+
+---
+
+## 📝 Session Logging
+
+When `MONGO_URI` is provided, the backend creates a MongoDB Atlas document for each terminal session and appends an ordered event log containing commands, raw terminal output chunks, resize events, and major story triggers. Omit the variable (or leave it empty) to disable persistence entirely.
+
+* `MONGO_URI` – required connection string for Atlas (for example, `mongodb+srv://...`).
+* `MONGO_DB_NAME` – optional database override (defaults to `projectchimera`).
+* `MONGO_COLLECTION` – optional collection override (defaults to `sessions`).
+
+Event payloads can grow quickly; consider TTL indexes or archival strategies if you expect heavy usage.
 
 ---
 

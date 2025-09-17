@@ -13,6 +13,15 @@ PM2_APP_NAME="web-terminal-backend"
 TERMINAL_CONTAINER_DIR="$PROJECT_ROOT/container"
 TERMINAL_IMAGE_NAME="ghcr.io/bieggerm/projectchimera.xyz/terminal-container:latest"
 
+MONGO_DB_NAME="${MONGO_DB_NAME:-projectchimera}"
+MONGO_COLLECTION="${MONGO_COLLECTION:-sessions}"
+
+export MONGO_DB_NAME
+export MONGO_COLLECTION
+if [ -n "$MONGO_URI" ]; then
+  export MONGO_URI
+fi
+
 echo "--- Starting Project Chimera Full Deployment ---"
 echo "Project Root: $PROJECT_ROOT"
 echo "------------------------------------------------"
@@ -52,9 +61,20 @@ echo "Installing Node.js dependencies..."
 npm install --production
 echo "Dependencies installed."
 
+if [ -z "$MONGO_URI" ]; then
+  echo "WARNING: MONGO_URI is not set. Session logging to MongoDB Atlas will be disabled."
+else
+  echo "MongoDB Atlas logging enabled for database '$MONGO_DB_NAME' collection '$MONGO_COLLECTION'."
+fi
+
 echo "Starting backend with PM2..."
 pm2 restart "$PM2_APP_NAME" --update-env 2>/dev/null || \
-  TERMINAL_IMAGE_NAME="$TERMINAL_IMAGE_NAME" pm2 start server.js --name "$PM2_APP_NAME"
+  env \
+    TERMINAL_IMAGE_NAME="$TERMINAL_IMAGE_NAME" \
+    ${MONGO_URI:+MONGO_URI="$MONGO_URI"} \
+    ${MONGO_DB_NAME:+MONGO_DB_NAME="$MONGO_DB_NAME"} \
+    ${MONGO_COLLECTION:+MONGO_COLLECTION="$MONGO_COLLECTION"} \
+    pm2 start server.js --name "$PM2_APP_NAME"
 echo "Backend running under PM2 process '$PM2_APP_NAME'."
 
 echo "--- Backend Deployment Complete ---"
@@ -77,3 +97,4 @@ echo "--- Deployment of Project Chimera Complete! ---"
 echo "Access your terminal at https://$DOMAIN_NAME/"
 echo "Remember to clear your browser cache (Ctrl+Shift+R / Cmd+Shift+R)."
 echo "------------------------------------------------"
+
