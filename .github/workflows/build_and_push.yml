@@ -32,5 +32,6 @@ jobs:
           context: container/
           file: container/Dockerfile
           push: true
+          platforms: linux/amd64,linux/arm64
           tags: ghcr.io/bieggerm/projectchimera.xyz/terminal-container:latest
 
